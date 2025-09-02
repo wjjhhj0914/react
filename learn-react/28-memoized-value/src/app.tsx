@@ -1,21 +1,153 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  ReactNode,
+  // type DependencyList,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { LearnSection } from '@/components'
 
 export default function App() {
   return (
     <LearnSection title="랜덤 카운트 업" className="p-10">
-      <MemoizedDemo />
+      <UseCallbackDemo />
     </LearnSection>
   )
 }
 
 // --------------------------------------------------------------------------
+// 사용자 정의 useCallback 훅
+// function useCallback(callback: () => void, deps: DependencyList) {
+//   return useMemo(() => callback, deps)
+// }
+
+// --------------------------------------------------------------------------
+// useCallback 데모
+function UseCallbackDemo() {
+  const [divideValue, setDivideValue] = useState<number>(1)
+
+  const filteredHighCostList = useMemo(() => {
+    return highCostList.filter(({ key }) => key % divideValue === 0)
+  }, [divideValue])
+
+  const [isDark, setIsDark] = useState(true)
+
+  const theme = useMemo(
+    () =>
+      isDark
+        ? {
+            backgroundColor: '#000',
+            color: '#fff',
+          }
+        : {
+            backgroundColor: '#fff',
+            color: '#000',
+          },
+    [isDark]
+  )
+
+  // 컴포넌트 몸체(body) 내부에 정의된 함수
+  // 정의된 함수는 isDark 상태 값이 변경될 때 말고는 다시 계산될 필요가 없다.
+  // const printDarkModeState = useMemo(() => 함수값, [])
+  // const printDarkModeState = useMemo(
+  //   function () {
+  //     return function () {
+  //       console.time('고비용 계산')
+  //       for (let i = 0; i < 3e8; i++) {}
+  //       console.timeEnd('고비용 계산')
+  //       console.log({ isDark })
+  //     }
+  //   },
+  //   [isDark]
+  // )
+  // useMemo 훅을 사용해 함수 값을 반환했더니 코드가 장황하다.
+  // const printDarkModeState = useMemo(
+  //   () => () => {
+  //     console.time('고비용 계산')
+  //     for (let i = 0; i < 3e8; i++) {}
+  //     console.timeEnd('고비용 계산')
+  //     console.log({ isDark })
+  //   },
+  //   [isDark]
+  // )
+  // 장황한 코드를 보다 간결하게 작성할 수 있도록 제공하는 훅이 있다.
+  // 그 훅의 이름은 useCallback이다. (내부적으로 useMemo 사용하는 훅)
+  const printDarkModeState = useCallback(() => {
+    console.time('고비용 계산')
+    for (let i = 0; i < 3e8; ++i) {}
+    console.timeEnd('고비용 계산')
+    console.log({ isDark })
+  }, [isDark])
+
+  useEffect(() => {
+    // 이펙트의 종속성(의존성) 데이터인
+    // 함수 값이 변경될 때만 이펙트 함수 콜백
+    console.log('이펙트 함수 실행')
+    printDarkModeState()
+  }, [printDarkModeState])
+
+  return (
+    <>
+      <ThemeChangeButton
+        onChangeTheme={useCallback(() => setIsDark((d) => !d), [setIsDark])}
+      >
+        {'테마 스위치'}
+      </ThemeChangeButton>
+
+      <div className="p-5" style={theme}>
+        <h2 className="text-xl font-semibold mb-6">메모이제이션 훅</h2>
+
+        <div role="group">
+          <label htmlFor="divide-value">나머지 수</label>
+          <input
+            type="number"
+            id="divide-value"
+            className="border p-2 w-[3rem]"
+            value={divideValue}
+            onChange={(e) => setDivideValue(Number(e.target.value))}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <output>
+            리스트 총 갯수: {highCostList.length.toLocaleString()}
+          </output>
+          <output>
+            필터링된 리스트의 갯수:{' '}
+            {filteredHighCostList.length.toLocaleString()}
+          </output>
+        </div>
+      </div>
+    </>
+  )
+}
+
+interface Props {
+  children: ReactNode
+  onChangeTheme: () => void
+}
+
+function ThemeChangeButton({ children, onChangeTheme }: Props) {
+  return (
+    <button
+      type="button"
+      className="cursor-pointer bg-blue-700 text-white p-2 rounded fixed right-3 top-3 z-50 text-xs"
+      onClick={onChangeTheme}
+    >
+      {children}
+    </button>
+  )
+}
+
+// --------------------------------------------------------------------------
+// useMemo 데모
 
 const highCostList = Array(1e7)
   .fill(null)
   .map((_, i) => ({ key: i + 1 }))
 
-function MemoizedDemo() {
+function UseMemoDemo() {
   const [divideValue, setDivideValue] = useState<number>(1)
 
   console.time('리스트 필터링')
