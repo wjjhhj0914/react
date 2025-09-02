@@ -4,14 +4,18 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { LearnSection } from '@/components'
+import { usePrev } from '@/hooks'
 
 export default function App() {
   return (
     <LearnSection title="랜덤 카운트 업" className="p-10">
       <UseCallbackDemo />
+      <hr className="my-8" />
+      <UseMemoDemo />
     </LearnSection>
   )
 }
@@ -22,16 +26,45 @@ export default function App() {
 //   return useMemo(() => callback, deps)
 // }
 
+interface Props {
+  children: ReactNode
+  onChangeTheme: () => void
+}
+
+// 컴포넌트 렌더링 성능 최적화
+// - React.useMemo
+// - React.useCallback
+// - React.memo
+
+function ThemeChangeButton({ children, onChangeTheme }: Props) {
+  usePrev(children)
+  usePrev(onChangeTheme)
+
+  return (
+    <button
+      type="button"
+      className="cursor-pointer bg-blue-700 text-white p-2 rounded fixed right-3 top-3 z-50 text-xs"
+      onClick={onChangeTheme}
+    >
+      {children}
+    </button>
+  )
+}
+
 // --------------------------------------------------------------------------
 // useCallback 데모
 function UseCallbackDemo() {
-  const [divideValue, setDivideValue] = useState<number>(1)
+  const [divideValue, setDivideValue] = useState(1)
 
   const filteredHighCostList = useMemo(() => {
     return highCostList.filter(({ key }) => key % divideValue === 0)
   }, [divideValue])
 
   const [isDark, setIsDark] = useState(true)
+  const handleChangeDarkTheme = useCallback(
+    () => setIsDark((d) => !d),
+    [setIsDark]
+  )
 
   const theme = useMemo(
     () =>
@@ -74,25 +107,26 @@ function UseCallbackDemo() {
   // 장황한 코드를 보다 간결하게 작성할 수 있도록 제공하는 훅이 있다.
   // 그 훅의 이름은 useCallback이다. (내부적으로 useMemo 사용하는 훅)
   const printDarkModeState = useCallback(() => {
-    console.time('고비용 계산')
+    // console.time('고비용 계산')
     for (let i = 0; i < 3e8; ++i) {}
-    console.timeEnd('고비용 계산')
-    console.log({ isDark })
-  }, [isDark])
+    // console.timeEnd('고비용 계산')
+    // console.log({ isDark })
+  }, [])
 
   useEffect(() => {
     // 이펙트의 종속성(의존성) 데이터인
     // 함수 값이 변경될 때만 이펙트 함수 콜백
-    console.log('이펙트 함수 실행')
+    // console.log('이펙트 함수 실행')
     printDarkModeState()
   }, [printDarkModeState])
 
   return (
     <>
       <ThemeChangeButton
-        onChangeTheme={useCallback(() => setIsDark((d) => !d), [setIsDark])}
+        onChangeTheme={handleChangeDarkTheme}
+        // onChangeTheme={() => setIsDark((d) => !d)}
       >
-        {'테마 스위치'}
+        {`테마 스위치 ${divideValue}`}
       </ThemeChangeButton>
 
       <div className="p-5" style={theme}>
@@ -123,23 +157,6 @@ function UseCallbackDemo() {
   )
 }
 
-interface Props {
-  children: ReactNode
-  onChangeTheme: () => void
-}
-
-function ThemeChangeButton({ children, onChangeTheme }: Props) {
-  return (
-    <button
-      type="button"
-      className="cursor-pointer bg-blue-700 text-white p-2 rounded fixed right-3 top-3 z-50 text-xs"
-      onClick={onChangeTheme}
-    >
-      {children}
-    </button>
-  )
-}
-
 // --------------------------------------------------------------------------
 // useMemo 데모
 
@@ -149,6 +166,7 @@ const highCostList = Array(1e7)
 
 function UseMemoDemo() {
   const [divideValue, setDivideValue] = useState<number>(1)
+  usePrev(divideValue)
 
   console.time('리스트 필터링')
   // const filteredHighCostList = useMemo(() => 계산된 값, [종속성(반응성데이터)]) // 값을 메모(기억)
