@@ -3,22 +3,23 @@ import { type Draft } from 'immer'
 import { useImmer } from 'use-immer'
 import { type State } from '@/@types/global'
 
-const init = <T>(): State<T> => ({
+const init = <T>(initialData: T | null): State<T> => ({
   status: 'idle',
   error: null,
-  data: null,
+  data: initialData,
 })
 
 export default function useQuery<T = unknown>(
   url: string,
-  options?: RequestInit
+  options?: RequestInit,
+  initialData: T | null = null
 ) {
-  const [state, setState] = useImmer<State<T>>(init)
+  const [state, setState] = useImmer<State<T>>(init(initialData))
 
   const abortControllerRef = useRef<AbortController>(null)
 
   const isLoading = state.status === 'pending'
-  const hasError = !!state.error
+  const hasError = state.status === 'rejected'
 
   const fetchData = useCallback(
     async (url: string, options?: RequestInit) => {
@@ -55,17 +56,17 @@ export default function useQuery<T = unknown>(
     [setState]
   )
 
-  const refetch = useCallback(async () => {
+  const refetch = useCallback(() => {
     abortControllerRef.current = new AbortController()
-    await fetchData(url, {
+    fetchData(url, {
       signal: abortControllerRef.current.signal,
       ...options,
     })
   }, [fetchData, url, options])
 
   const reset = useCallback(() => {
-    setState(init)
-  }, [setState])
+    setState(init(initialData))
+  }, [setState, initialData])
 
   useEffect(() => {
     abortControllerRef.current = new AbortController()

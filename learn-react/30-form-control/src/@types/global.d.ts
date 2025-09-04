@@ -2,8 +2,8 @@ export type Timeout = ReturnType<typeof setTimeout> | number | undefined
 
 export type Status = 'idle' | 'pending' | 'resolved' | 'rejected'
 
-export interface State<DataType, ErrorType = Error> {
+export interface State<T> {
   status: Status
-  error: null | ErrorType
-  data: null | DataType
+  error: null | Error | string
+  data: null | T
 }

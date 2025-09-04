@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-export default function useArray<Type = unknown>(initialValue: Type[]) {
+export default function useArray<Type>(initialValue: Type[] = []) {
   const [array, setArray] = useState(initialValue)
+  const arrayRef = useRef(initialValue)
 
   const set = useCallback((nextArray: Type[]) => {
     setArray(nextArray)
@@ -35,6 +36,11 @@ export default function useArray<Type = unknown>(initialValue: Type[]) {
   const clear = useCallback(() => setArray([]), [])
 
   const reset = useCallback(() => setArray(initialValue), [initialValue])
+
+  useEffect(() => {
+    // 초깃값(initialValue) 변경 시, 참조 객체의 현재값 동기화
+    arrayRef.current = initialValue
+  }, [initialValue])
 
   return { array, set, push, unshift, replace, filter, remove, reset, clear }
 }

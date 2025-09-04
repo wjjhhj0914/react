@@ -1,13 +1,13 @@
 import { type ChangeEvent, useCallback, useEffect, useState } from 'react'
 
-export default function useInput<T = string>(initialValue: T) {
-  const [value, setValue] = useState<T>(initialValue)
+export default function useInput(initialValue: string | number) {
+  const [value, setValue] = useState(String(initialValue))
   const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value as T)
+    setValue(e.target.value)
   }, [])
 
   useEffect(() => {
-    setValue(initialValue)
+    setValue(String(initialValue))
   }, [initialValue])
 
   return { value, onChange }
