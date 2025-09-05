@@ -1,6 +1,7 @@
 import type { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import type { JSX } from 'react/jsx-runtime'
+import { Session } from 'inspector/promises'
 import { toast } from 'sonner'
 import { usePageQuery } from '@/hooks'
 import Navigation, { type Page } from '@/pages/common/navigation'
@@ -45,9 +46,23 @@ export default function AppPage() {
       }
     })
     // [실습] Supabase 인증 상태 변경 구독
-    // ...
-    // [실습] Supabase 인증 구독 해제
-    // ...
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, Session) => {
+      switch (event) {
+        case 'SIGNED_IN':
+          console.log('로그인')
+          break
+        case 'SIGNED_OUT':
+          console.log('로그인')
+          setUser(null)
+          break
+      }
+    })
+    return () => {
+      // [실습] Supabase 인증 구독 해제
+      subscription.unsubscribe()
+    }
   }, [])
 
   let renderPage: JSX.Element | null = null

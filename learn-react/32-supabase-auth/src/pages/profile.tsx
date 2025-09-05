@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js'
 import { toast } from 'sonner'
-import { type ProfilePartial } from '@/libs/supabase'
+import supabase, { type ProfilePartial } from '@/libs/supabase'
 import { navigate } from '@/utils'
 
 interface Props {
@@ -22,9 +22,14 @@ export default function ProfilePage({ user }: Props) {
           <button
             onClick={async () => {
               // [실습] Supabase 로그아웃
+              const { error } = await supabase.auth.signOut()
 
-              toast('로그아웃 되었습니다.')
-              navigate('signin')
+              if (!error) {
+                toast.success('성공적으로 로그아웃 되었습니다.')
+                navigate('signin')
+              } else {
+                toast.error(`로그아웃 오류 발생! ${error.message}`)
+              }
             }}
             className="w-full mt-4 bg-gray-200 py-2 rounded hover:bg-gray-300 transition"
           >
