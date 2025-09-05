@@ -4,14 +4,14 @@ import type { JSX } from 'react/jsx-runtime'
 import { toast } from 'sonner'
 import { usePageQuery } from '@/hooks'
 import Navigation, { type Page } from '@/pages/common/navigation'
-import supabase from './libs/supabase'
+import supabase, { type Profile } from './libs/supabase'
 import ProfilePage from './pages/profile'
 import SignInPage from './pages/sign-in'
 import SignUpPage from './pages/sign-up'
 
 export default function AppPage() {
   const page = usePageQuery<Page>('signup')
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<Partial<Profile> | null>(null)
 
   // 부수 효과 처리 : 외부 시스템과 리액트 앱 동기화
   useEffect(() => {
@@ -22,11 +22,26 @@ export default function AppPage() {
 
   useEffect(() => {
     // [실습] 최초 마운트 시, Supabase에서 현재 사용자 정보 가져오기
-    supabase.auth.getUser().then(({ error, data }) => {
+    supabase.auth.getUser().then(async ({ error, data }) => {
       if (error) {
         toast.error(`사용자 검색 오류 발생! ${error.message}`)
       } else {
-        setUser(data.user ?? null)
+        // 인증된 사용자 정보 가져오기에 성공!
+        // 프로필 테이블에서 데이터 필터링해 가져오기 시도
+        const { error: userProfileError, data: userProfile } = await supabase // 항상 supabase는 error와 data를 반환함. AuthResponse
+          .from('profiles')
+          .select('username, email, bio')
+          .eq('id', data.user.id)
+          .single() // 우리가 가져오는 데이터가 배열일 수도 있기 때문에, 하나의 데이터만 꺼내는 single() 추가
+
+        if (userProfileError) {
+          toast.error(
+            `프로필 데이터 가져오기 오류 발생! ${userProfileError.message}`
+          )
+        } else {
+          setUser(userProfile)
+        }
+        // setUser(data.user ?? null)
       }
     })
     // [실습] Supabase 인증 상태 변경 구독

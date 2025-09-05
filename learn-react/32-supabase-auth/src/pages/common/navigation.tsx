@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js'
+import { type Profile } from '@/libs/supabase'
 import { tw } from '@/utils'
 import NavLink, { type NavigationItem } from './nav-link'
 
@@ -11,7 +12,7 @@ const PAGES: NavigationItem[] = [
 ]
 
 interface Props {
-  user: User | null
+  user: Partial<Profile> | null
 }
 
 export default function Navigation({ user }: Props) {

@@ -1,9 +1,10 @@
 import type { User } from '@supabase/supabase-js'
 import { toast } from 'sonner'
+import { type Profile } from '@/libs/supabase'
 import { navigate } from '@/utils'
 
 interface Props {
-  user: User | null
+  user: Partial<Profile> | null
 }
 
 export default function ProfilePage({ user }: Props) {
@@ -13,8 +14,7 @@ export default function ProfilePage({ user }: Props) {
       {user ? (
         <div>
           <div className="mb-2">
-            <span className="font-medium">이름:</span>{' '}
-            {user.user_metadata?.username || '-'}
+            <span className="font-medium">이름:</span> {user.username || '-'}
           </div>
           <div className="mb-2">
             <span className="font-medium">이메일:</span> {user.email}
