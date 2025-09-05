@@ -14,7 +14,7 @@ export default function ProfilePage({ user }: Props) {
         <div>
           <div className="mb-2">
             <span className="font-medium">이름:</span>{' '}
-            {user.user_metadata?.name || '-'}
+            {user.user_metadata?.username || '-'}
           </div>
           <div className="mb-2">
             <span className="font-medium">이메일:</span> {user.email}

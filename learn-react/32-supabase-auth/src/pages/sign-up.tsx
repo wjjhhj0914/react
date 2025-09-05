@@ -1,7 +1,10 @@
+import { AuthResponse } from '@supabase/supabase-js'
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 import { useToggleState } from '@/hooks'
-import { tw } from '@/utils'
+import supabase from '@/libs/supabase'
+import { navigate, tw } from '@/utils'
 
 // 폼 입력값 타입 정의
 type SignupForm = {
@@ -19,6 +22,7 @@ export default function SignUpPage() {
     handleSubmit, // 제출 이벤트 핸들러
     watch, // 특정 필드 값 실시간 참조
     formState: { errors, isSubmitting }, // 에러 및 제출 중 상태
+    reset, // 폼 초기화 함수
   } = useForm<SignupForm>({
     mode: 'onChange', // 값 변경 시마다 유효성 검사
   })
@@ -28,20 +32,64 @@ export default function SignUpPage() {
   const [showPassword2, { toggle: togglePassword2 }] = useToggleState(false)
 
   // 폼 제출 시, 실행되는 비동기 함수
-  const onSubmit = async (_formData: SignupForm) => {
+  const onSubmit = async (formData: SignupForm) => {
     // 폼 제출중에는 실행되지 않도록 설정
     if (isSubmitting) return
 
+    console.log(formData)
+
     // [실습] Supabase 회원가입 API 호출
     // - 메타데이터 추가 (사용자 이름 및 소개)
+    const { error, data } = await supabase.auth.signUp({
+      // 회원가입에 필요한 필수 정보
+      email: formData.email,
+      password: formData.password,
+      // 사용자의 메타데이터 추가
+      options: {
+        data: {
+          username: formData.name,
+          bio: formData.bio,
+        },
+      },
+    })
+
+    console.log({ error, data })
 
     // [실습] 회원가입 API 호출 에러 처리
     // - toast로 오류 상태 알림
+    if (error) {
+      toast.error(`에러 발생! ${error.message}`)
+    }
 
     // [실습] 회원가입 API 호출 성공 처리
-    // - profiles 테이블에 사용자 정보 저장 (오류 발생 시, toast 알림)
-    // - toast로 회원가입 성공 메시지 알림 및 로그인 페이지 이동 액션 추가
-    // - 폼 초기화
+    else {
+      // - profiles 테이블에 사용자 정보 저장 (오류 발생 시, toast 알림)
+      const userMetadata = data.user?.user_metadata
+      const userId = data.user?.id
+
+      if (userId && userMetadata) {
+        const { error } = await supabase.from('profiles').insert({
+          id: userId,
+          email: userMetadata.email,
+          username: userMetadata.username,
+          bio: userMetadata.bio,
+        })
+        // - toast로 회원가입 성공 메시지 알림 및 로그인 페이지 이동 액션 추가
+        if (error) {
+          toast.error(`오류 발생! ${error.message}`)
+        } else {
+          toast.success('회원가입 성공', {
+            action: {
+              label: '로그인 페이지로 이동',
+              onClick: () => navigate('signin'),
+            },
+          })
+        }
+      }
+
+      // - 폼 초기화
+      reset()
+    }
   }
 
   // password2 유효성 검증을 위해 password 값을 참조

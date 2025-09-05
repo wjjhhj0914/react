@@ -1,6 +1,9 @@
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 import { useToggleState } from '@/hooks'
+import supabase from '@/libs/supabase'
+import { navigate } from '@/utils'
 
 type LoginForm = {
   email: string
@@ -13,6 +16,7 @@ export default function SignInPage() {
     register, // <input>에 상태 등록
     handleSubmit, // 제출 이벤트 핸들러
     formState: { errors, isSubmitting }, // 에러 및 제출 중 상태
+    reset, // 폼 초기화 함수
   } = useForm<LoginForm>({
     mode: 'onChange', // 값 변경 시마다 유효성 검사
   })
@@ -21,18 +25,36 @@ export default function SignInPage() {
   const [showPassword, { toggle }] = useToggleState(false)
 
   // 폼 제출 시, 실행되는 비동기 함수
-  const onSubmit = async (_formData: LoginForm) => {
+  const onSubmit = async (formData: LoginForm) => {
     // 폼 제출 중에는 실행되지 않도록 설정
     if (isSubmitting) return
 
     // [실습] Supabase 로그인 API 호출
+    const { error, data } = await supabase.auth.signInWithPassword(formData)
 
     // [실습] 로그인 API 호출 에러 처리
-    // - toast로 오류 상태 알림
-
-    // [실습] 로그인 API 호출 성공 처리
-    // - toast로 로그인 성공 메시지 알림 및 프로필 페이지 이동 액션 추가
-    // - 폼 초기화
+    if (error) {
+      // - toast로 오류 상태 알림
+      toast.error(
+        `로그인 오류 발생! ${error.status}:${error.name}:${error.message}`
+      )
+    } else {
+      // [실습] 로그인 API 호출 성공 처리
+      if (data.user) {
+        const { username } = data.user.user_metadata
+        // - toast로 로그인 성공 메시지 알림 및 프로필 페이지 이동 액션 추가
+        toast.success(`${username}님! 로그인이 성공되었습니다.`, {
+          action: {
+            label: '프로필 페이지로 이동',
+            onClick: () => {
+              navigate('profile')
+              // - 폼 초기화
+              reset()
+            },
+          },
+        })
+      }
+    }
   }
 
   return (
