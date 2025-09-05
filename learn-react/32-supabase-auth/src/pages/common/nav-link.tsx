@@ -1,6 +1,6 @@
 import { User } from '@supabase/supabase-js'
 import type { MouseEvent } from 'react'
-import { type Profile } from '@/libs/supabase'
+import { type ProfilePartial } from '@/libs/supabase'
 import { navigate, tw } from '@/utils'
 import { Page } from './navigation'
 
@@ -11,7 +11,7 @@ export interface NavigationItem {
 }
 
 interface Props {
-  user: Partial<Profile> | null
+  user: Partial<ProfilePartial> | null
   item: NavigationItem
 }
 

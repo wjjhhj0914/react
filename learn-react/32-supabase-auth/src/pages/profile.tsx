@@ -1,10 +1,10 @@
 import type { User } from '@supabase/supabase-js'
 import { toast } from 'sonner'
-import { type Profile } from '@/libs/supabase'
+import { type ProfilePartial } from '@/libs/supabase'
 import { navigate } from '@/utils'
 
 interface Props {
-  user: Partial<Profile> | null
+  user: Partial<ProfilePartial> | null
 }
 
 export default function ProfilePage({ user }: Props) {
