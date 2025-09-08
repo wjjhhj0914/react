@@ -1,10 +1,16 @@
 // Modal Dialog 컴포넌트
 // 1. Custom Modal Dialog: <div role="dialog" aria-modal="true">
 // 2. Native Modal Dialog: <dialog aria-modal="true">
-import { type MouseEvent, type PropsWithChildren, useId, useRef } from 'react'
+import {
+  type MouseEvent,
+  type PropsWithChildren,
+  useEffect,
+  useId,
+  useRef,
+} from 'react'
 import { createPortal } from 'react-dom'
 import { XCircleIcon } from 'lucide-react'
-import { tw } from '@/utils'
+import { tabbableSelector, tw } from '@/utils'
 
 type Props = PropsWithChildren<{
   open?: boolean
@@ -21,19 +27,89 @@ export default function CustomModalDialog({
   children,
 }: Props) {
   const dialogDimRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  const openerRef = useRef<HTMLElement>(null)
 
   const dialogId = useId()
   const titleId = `${dialogId}-title`
   const describeId = `${dialogId}-describe`
 
-  const portalContainer = document.getElementById('modal-dialog-portal')
-  if (!portalContainer) return null
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!open || !dialog) return
+
+    // 다이얼로그가 열리면
+    // 모달 다이얼로그를 연 어떤 요소를 RefObject를 사용해 기억할 것 (useRef)
+    openerRef.current = document.activeElement as HTMLElement
+
+    // 다이얼로그 안에서 탭키로 탐색 가능한(tabbable) 요소들을 수집
+    const tabbables = [...dialog.querySelectorAll(tabbableSelector)]
+    const isExistTabbables = tabbables.length > 0
+
+    // 첫 번째 탭 키로 이동 가능한 요소에 초점 이동 설정
+    const focusingFirstTabbable = () => {
+      if (isExistTabbables) {
+        const firstTabbable = tabbables.at(0) as HTMLElement
+        firstTabbable.focus()
+      }
+    }
+
+    focusingFirstTabbable()
+
+    // 포커스 트랩(focus-trap)
+    // - 탭 이동이 가능한(tabbable) 요소들 중 마지막 요소에서
+    //   Tab 키를 누르면 첫번째 요소로 초점 이동 (브라우저 기본 작동 방지)
+    // - 탭 이동이 가능한(tabbable) 요소들 중 첫번째 요소에서
+    //   Shift + Tab 키를 누르면 마지막 요소로 초점 이동 (브라우저 기본 작동 방지)
+    // - 탈출(Escape) 키를 누르면 모달 다이얼로그가 닫혀야 하고,
+    // 모달 다이얼로그를 트리거(trigger)한 오프너(opener) 요소에 초점을 되돌려 주어야 함
+    const handleFocusTrap = (e: globalThis.KeyboardEvent) => {
+      if (!isExistTabbables) return
+
+      const { key, shiftKey } = e
+      const { activeElement } = document
+      const firstTabbable = tabbables.at(0) as HTMLElement
+      const lastTabbable = tabbables.at(-1) as HTMLElement
+
+      if (key === 'Escape') {
+        onClose?.()
+        openerRef.current?.focus()
+        // 닫긴 닫지만, 열었던 애한테 초점을 줘! 코드
+
+        return
+      }
+
+      if (key === 'Tab') {
+        if (shiftKey && activeElement === firstTabbable) {
+          // - 탭 이동이 가능한(tabbable) 요소들 중 마지막 요소에서
+          //   Tab 키를 누르면 첫번째 요소로 초점 이동 (브라우저 기본 작동 방지)
+          e.preventDefault() // 브라우저가 탐색할 수 있도록 만들어놓은 거를 방지하는 거임
+          lastTabbable.focus()
+        } else if (!shiftKey && activeElement === lastTabbable) {
+          // - 탭 이동이 가능한(tabbable) 요소들 중 첫번째 요소에서
+          //   Shift + Tab 키를 누르면 마지막 요소로 초점 이동 (브라우저 기본 작동 방지)
+          e.preventDefault()
+          console.log('Tab')
+        }
+      }
+    }
+
+    dialog.addEventListener('keydown', handleFocusTrap)
+
+    return () => {
+      dialog.removeEventListener('keydown', handleFocusTrap)
+    }
+  }, [open, onClose])
 
   const handleClose = (e: MouseEvent<HTMLDivElement>) => {
     if (dialogDimRef.current === e.target) {
       onClose?.()
     }
   }
+
+  const portalContainer = document.getElementById('modal-dialog-portal')
+  if (!portalContainer) return null
 
   return createPortal(
     <div
@@ -48,6 +124,7 @@ export default function CustomModalDialog({
       )}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
