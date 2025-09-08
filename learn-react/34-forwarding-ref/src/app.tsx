@@ -34,6 +34,7 @@ export default function App() {
       <form noValidate onSubmit={handleSubmit} className="flex gap-1">
         {/* 하위 커스텀 컴포넌트에 ref 전달하기 (React 18 실패 ❌) */}
         {/* 리액트가 말하길, React.forwardRef 고차 컴포넌트를 사용해야 해! */}
+        {/* 하위 커스텀 컴포넌트에 ref 전달하기 (React 19 성공 ✅) */}
         {/* <EmailInput ref={inputRef} /> */}
         <EmailInput ref={inputRef} />
         <button type="submit" className="button flex gap-1 items-center">
