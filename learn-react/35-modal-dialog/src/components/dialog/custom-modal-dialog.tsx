@@ -8,9 +8,11 @@ import {
   useEffect,
   useId,
   useRef,
+  useState,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { XCircleIcon } from 'lucide-react'
+import { useOoenAnimating } from '@/hooks'
 import { tabbableSelector, tw } from '@/utils'
 
 type Props = PropsWithChildren<{
@@ -34,6 +36,10 @@ export default function CustomModalDialog({
   const dialogId = useId()
   const titleId = `${dialogId}-title`
   const describeId = `${dialogId}-describe`
+
+  // 길고 복잡한 코드를 훅으로 꺼내옴
+  const animationDuration = 250
+  const { openFinished } = useOoenAnimating(open, animationDuration)
 
   const close = useCallback(() => {
     opennerRef.current?.focus()
@@ -121,9 +127,11 @@ export default function CustomModalDialog({
       onClick={(e) => dialogDimRef.current === e.target && close()}
       className={tw(
         'fixed inset-0 z-10000',
-        open ? 'flex' : 'hidden',
-        'justify-center items-center',
-        'bg-black/20 backdrop-blur-[3px]'
+        // open ? 'flex' : 'hidden',
+        'flex justify-center items-center',
+        'bg-black/20 backdrop-blur-[3px]',
+        'transition-all duration-250',
+        openFinished ? 'opacity-100' : 'opacity-0 pointer-events-none'
       )}
     >
       <div
@@ -135,7 +143,11 @@ export default function CustomModalDialog({
         className={tw(
           'relative',
           'w-full max-w-lg rounded-lg shadow-xl p-10',
-          'bg-white'
+          'bg-white',
+          'transition-all duration-250',
+          openFinished
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-10'
         )}
       >
         <h2 id={titleId}>{title && '다이얼로그 제목'}</h2>

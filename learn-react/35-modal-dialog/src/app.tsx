@@ -1,4 +1,5 @@
-import NativeModalDialog from './components/dialog/native-modal-dialog'
+// import NativeModalDialog from './components/dialog/native-modal-dialog'
+import CustomModalDialog from './components/dialog/custom-modal-dialog'
 import { useToggleState } from './hooks'
 
 export default function App() {
@@ -18,7 +19,7 @@ export default function App() {
       </div>
 
       <div className="transform-3d">
-        <NativeModalDialog open={showDialog} onClose={closeDialog}>
+        <CustomModalDialog open={showDialog} onClose={closeDialog}>
           <div className="max-w-prose [&_p]:leading-normal space-y-3">
             <p>
               다이얼로그는 사용자와 상호작용하는 모달 창으로, 정보를 표시하거나
@@ -37,7 +38,7 @@ export default function App() {
               참고
             </a>
           </div>
-        </NativeModalDialog>
+        </CustomModalDialog>
       </div>
 
       <div className="max-w-prose [&_p]:leading-normal space-y-3">
