@@ -1,14 +1,11 @@
-// import NativeModalDialog from './components/dialog/native-modal-dialog'
 import CustomModalDialog from './components/dialog/custom-modal-dialog'
+import NativeModalDialog from './components/dialog/native-modal-dialog'
 import { useToggleState } from './hooks'
 
 export default function App() {
   // 모달 다이얼로그 열기/닫기 상태 선언
   const [showDialog, dialogHandles] = useToggleState(false)
   const { on: openDialog, off: closeDialog } = dialogHandles
-  // const [showDialog, setShowDialog] = useState<boolean>(false)
-  // const openDialog = () => setShowDialog(true)
-  // const closeDialog = () => setShowDialog(false)
 
   return (
     <div className="p-10 flex flex-col gap-5">
@@ -19,8 +16,9 @@ export default function App() {
       </div>
 
       <div className="transform-3d">
-        <CustomModalDialog open={showDialog} onClose={closeDialog}>
+        <NativeModalDialog open={showDialog} onClose={closeDialog}>
           <div className="max-w-prose [&_p]:leading-normal space-y-3">
+            <input type="text" className="input" aria-label="메시지" />
             <p>
               다이얼로그는 사용자와 상호작용하는 모달 창으로, 정보를 표시하거나
               사용자 입력을 받는 데 사용됩니다.
@@ -38,7 +36,7 @@ export default function App() {
               참고
             </a>
           </div>
-        </CustomModalDialog>
+        </NativeModalDialog>
       </div>
 
       <div className="max-w-prose [&_p]:leading-normal space-y-3">
@@ -60,10 +58,10 @@ export default function App() {
         </a>
       </div>
 
-      {Array(10)
+      {Array(4)
         .fill(null)
         .map((_, i) => (
-          <div key={i} className="h-[300px] bg-amber-300" />
+          <div key={i} className="h-[300px] max-w-lg bg-amber-300" />
         ))}
     </div>
   )
