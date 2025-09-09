@@ -8,6 +8,7 @@ import {
 import { createPortal } from 'react-dom'
 import { XCircleIcon } from 'lucide-react'
 import { tabbableSelector, tw } from '@/utils'
+import './native-modal-dialog.css'
 
 type Props = PropsWithChildren<{
   open?: boolean
@@ -123,9 +124,14 @@ export default function NativeModalDialog({
       dialog.removeEventListener('keydown', handleFocusTrap)
       // 다이얼로그가 닫힌 상태
       // 문서의 스크롤 바를 표시
+
+      const duration = parseFloat(
+        globalThis.getComputedStyle(dialog).getPropertyValue('--duration')
+      )
+
       setTimeout(() => {
         document.body.style.overflowY = 'visible'
-      }, 0)
+      }, duration)
     }
   }, [open, onClose, close])
 
