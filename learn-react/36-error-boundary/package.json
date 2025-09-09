@@ -1,9 +1,14 @@
 {
   "private": true,
   "type": "module",
-  "name": "36-error-boundary",
+  "name": "react-ts-vite",
   "description": "리액트 템플릿 (Bun + Vite + TypeScript)",
   "version": "1.2.0",
+  "bun-create": {
+    "preinstall": [],
+    "postinstall": ["bunx rimraf -rf .git", "bunx rimraf -rf dist"],
+    "start": "bun run dev"
+  },
   "scripts": {
     "dev": "bunx --bun vite",
     "prod": "bun vite build",
