@@ -1,5 +1,5 @@
 import { LearnSection } from '@/components';
-import Counter from './practices/counter/js';
+import Counter from './practices/counter/ts';
 
 export default function App() {
   return (
