@@ -1,25 +1,29 @@
-import S from './history-item.module.css'
+import { useContext } from 'react';
+import { TicTacToeContext } from '../game';
+import S from './history-item.module.css';
+
+interface Props {
+  index: number;
+  isFirst: boolean;
+  selectedIndex: boolean;
+  onTimeTravel: () => void;
+}
 
 export default function HistoryItem({
   index,
   isFirst,
   selectedIndex: isDisabled,
-  onRestart,
   onTimeTravel,
-}: {
-  index: number
-  isFirst: boolean
-  selectedIndex: boolean
-  onRestart: () => void
-  onTimeTravel: () => void
-}) {
+}: Props) {
+  const gameState = useContext(TicTacToeContext);
+
   const label = isFirst
     ? '게임 시작!'
-    : `게임 #${index < 10 ? `0${index}` : index}`
+    : `게임 #${index < 10 ? `0${index}` : index}`;
 
-  const ariaLabel = isFirst ? undefined : `${label} 이동`
+  const ariaLabel = isFirst ? undefined : `${label} 이동`;
 
-  const handler = isFirst ? onRestart : onTimeTravel
+  const handler = isFirst ? gameState?.restartGame : onTimeTravel;
 
   return (
     <li className={S.HistoryListItem}>
@@ -33,5 +37,5 @@ export default function HistoryItem({
         {label}
       </button>
     </li>
-  )
+  );
 }
