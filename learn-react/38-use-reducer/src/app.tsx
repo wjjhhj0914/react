@@ -1,5 +1,5 @@
-import { LearnSection } from '@/components'
-import Counter from './counter.reducer'
+import { LearnSection } from '@/components';
+import Counter from './practices/count/js/counter';
 
 export default function App() {
   return (
@@ -7,7 +7,9 @@ export default function App() {
       title="랜덤 카운트 업"
       className="p-10 bg-black flex justify-center items-center h-screen"
     >
-      <Counter count={9} step={3} min={8} max={22} />
+      <div className="flex flex-col gap-4">
+        <Counter count={3} min={2} max={7} step={2} />
+      </div>
     </LearnSection>
-  )
+  );
 }
