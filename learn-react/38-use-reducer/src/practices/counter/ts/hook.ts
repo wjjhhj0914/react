@@ -1,5 +1,5 @@
 import { useReducer } from 'react';
-import { init, minusAction, plusAction, reducer } from './reducer';
+import { init, minusAction, plusAction, reducer, resetAction } from './reducer';
 
 interface Args {
   count?: number;
@@ -21,6 +21,7 @@ export default function useCounter({
 
   const handleMinus = () => dispatch(minusAction(step, min));
   const handlePlus = () => dispatch(plusAction(step, max));
+  const handleReset = () => dispatch(resetAction(count));
 
   return {
     ...state,
@@ -28,5 +29,6 @@ export default function useCounter({
     isMaxDisabled,
     onPlus: handlePlus,
     onMinus: handleMinus,
+    onReset: handleReset,
   };
 }

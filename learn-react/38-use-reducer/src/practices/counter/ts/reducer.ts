@@ -7,7 +7,8 @@ interface State {
 
 type Action =
   | { type: typeof ACTION.PLUS; payload: { step: number; max: number } }
-  | { type: typeof ACTION.MINUS; payload: { step: number; min: number } };
+  | { type: typeof ACTION.MINUS; payload: { step: number; min: number } }
+  | { type: typeof ACTION.RESET; payload: { initialValue: number } };
 
 // ----------------------------------------------------------------
 // 초기화(init) 함수
@@ -43,6 +44,11 @@ export function reducer(state: State, action: Action): State {
       return { count: nextCount < min ? min : nextCount };
     }
 
+    case ACTION.RESET: {
+      const { initialValue } = action.payload;
+      return { count: initialValue };
+    }
+
     default: {
       // 기본 상태 값 반환
       return state;
@@ -57,6 +63,7 @@ export function reducer(state: State, action: Action): State {
 const ACTION = {
   PLUS: '카운트 값 증가',
   MINUS: '카운트 값 감소',
+  RESET: '카운트 값 초기화',
 } as const;
 
 // ----------------------------------------------------------------
@@ -72,4 +79,9 @@ export const plusAction = (step: number, max: number): Action => ({
 export const minusAction = (step: number, min: number): Action => ({
   type: ACTION.MINUS,
   payload: { step, min },
+});
+
+export const resetAction = (initialValue: number): Action => ({
+  type: ACTION.RESET,
+  payload: { initialValue },
 });
