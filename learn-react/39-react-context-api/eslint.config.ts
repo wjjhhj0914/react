@@ -1,18 +1,18 @@
-import js from '@eslint/js'
-import pluginJsxA11y from 'eslint-plugin-jsx-a11y'
-import pluginPrettierRecommand from 'eslint-plugin-prettier/recommended'
-import pluginReact from 'eslint-plugin-react'
-import pluginReactHooks from 'eslint-plugin-react-hooks'
-import pluginReactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
-import globals from 'globals'
-import path from 'node:path'
-import * as tseslint from 'typescript-eslint'
+import js from '@eslint/js';
+import pluginJsxA11y from 'eslint-plugin-jsx-a11y';
+import pluginPrettierRecommand from 'eslint-plugin-prettier/recommended';
+import pluginReact from 'eslint-plugin-react';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
+import pluginReactRefresh from 'eslint-plugin-react-refresh';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
+import path from 'node:path';
+import * as tseslint from 'typescript-eslint';
 
-const reactJsxRuntime = pluginReact.configs.flat['jsx-runtime']
-const reactHooksRecommended = pluginReactHooks.configs['recommended-latest']
-const jsxA11yRecommended = pluginJsxA11y.flatConfigs.recommended
-const reactRefreshVite = pluginReactRefresh.configs.vite
+const reactJsxRuntime = pluginReact.configs.flat['jsx-runtime'];
+const reactHooksRecommended = pluginReactHooks.configs['recommended-latest'];
+const jsxA11yRecommended = pluginJsxA11y.flatConfigs.recommended;
+const reactRefreshVite = pluginReactRefresh.configs.vite;
 
 export default defineConfig([
   // 'dist' 폴더 전체를 ESLint 검사에서 제외 (빌드된 결과물 무시)
@@ -74,6 +74,13 @@ export default defineConfig([
   // 사용자 정의 규칙
   {
     rules: {
+      'react-refresh/only-export-components': [
+        'error',
+        {
+          allowExportNames: ['GlobalStateContext'],
+        },
+      ],
+
       // 정의되지 않은 변수 사용 금지
       'no-undef': 'error',
 
@@ -148,4 +155,4 @@ export default defineConfig([
       // 'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
-])
+]);
