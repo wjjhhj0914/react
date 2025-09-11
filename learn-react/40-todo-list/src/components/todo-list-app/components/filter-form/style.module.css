@@ -1,0 +1,22 @@
+.filterForm {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  flex-direction: column;
+  margin-block-end: 2rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 16px var(--shadow-color);
+  max-width: 100%;
+  background: var(--bg-secondary);
+  letter-spacing: -0.025em;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+  border-radius: 0.75rem;
+
+  .title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
