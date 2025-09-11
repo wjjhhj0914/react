@@ -1,7 +1,7 @@
-import { type MouseEvent, useContext } from 'react';
+import { type MouseEvent } from 'react';
 import { tw } from '@/utils';
 import { GRID, type PlayerType, getPlayerName } from '../constants';
-import { TicTacToeContext } from '../game';
+import { useTicTacToe } from '../context';
 import S from './square-grid-cell.module.css';
 
 interface Props {
@@ -15,7 +15,7 @@ export default function SquareGridCell({
   children,
   index,
 }: Props) {
-  const gameState = useContext(TicTacToeContext);
+  const gameState = useTicTacToe();
 
   const isDisabled = !!children;
 

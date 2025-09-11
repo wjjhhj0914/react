@@ -1,10 +1,9 @@
-import { useContext } from 'react';
-import { TicTacToeContext } from '../game';
+import { useTicTacToe } from '../context';
 import HistoryItem from './history-item';
 import S from './history.module.css';
 
 export default function History() {
-  const gameState = useContext(TicTacToeContext);
+  const gameState = useTicTacToe();
 
   return (
     <div className={S.History}>

@@ -1,5 +1,4 @@
-import { useContext } from 'react';
-import { TicTacToeContext } from '../game';
+import { useTicTacToe } from '../context';
 import S from './history-item.module.css';
 
 interface Props {
@@ -15,7 +14,7 @@ export default function HistoryItem({
   selectedIndex: isDisabled,
   onTimeTravel,
 }: Props) {
-  const gameState = useContext(TicTacToeContext);
+  const gameState = useTicTacToe();
 
   const label = isFirst
     ? '게임 시작!'

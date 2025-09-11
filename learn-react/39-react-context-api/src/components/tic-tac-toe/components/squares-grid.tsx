@@ -1,11 +1,11 @@
-import { type KeyboardEvent, useContext } from 'react';
+import { type KeyboardEvent } from 'react';
 import { GRID } from '../constants';
-import { TicTacToeContext } from '../game';
+import { useTicTacToe } from '../context';
 import SquareGridCell from './square-grid-cell';
 import S from './squares-grid.module.css';
 
 export default function SquaresGrid() {
-  const gameState = useContext(TicTacToeContext);
+  const gameState = useTicTacToe();
 
   const handleKeyControls = (e: KeyboardEvent<HTMLDivElement>) => {
     const { key } = e;

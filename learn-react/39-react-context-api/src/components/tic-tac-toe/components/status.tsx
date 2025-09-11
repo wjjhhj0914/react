@@ -1,9 +1,8 @@
-import { useContext } from 'react';
-import { TicTacToeContext } from '../game';
+import { useTicTacToe } from '../context';
 import S from './status.module.css';
 
 export default function Status() {
-  const gameState = useContext(TicTacToeContext);
+  const gameState = useTicTacToe();
 
   return (
     <h2 className={S.Status} role="status">
