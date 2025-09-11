@@ -1,5 +1,0 @@
-@reference 'tailwindcss';
-
-.container {
-  @apply max-w-150 ml-auto mr-auto;
-}

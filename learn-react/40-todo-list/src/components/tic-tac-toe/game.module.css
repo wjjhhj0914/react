@@ -1,8 +1,0 @@
-@reference 'tailwindcss';
-
-@layer components {
-  .Game {
-    @apply flex justify-center gap-15;
-    @apply py-10;
-  }
-}
