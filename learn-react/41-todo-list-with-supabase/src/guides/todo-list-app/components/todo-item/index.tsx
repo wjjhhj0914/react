@@ -5,32 +5,46 @@ import {
   useEffect,
   useRef,
   useState,
-} from 'react'
-import { tw } from '@/utils'
-import { useTodoListDispatch } from '../../context'
-import { type Todo } from '../../reducer'
-import S from './style.module.css'
+} from 'react';
+import { tw } from '@/utils';
+import { useTodoListDispatch } from '../../context';
+import { type Todo } from '../../reducer';
+import S from './style.module.css';
+import { deleteTodo } from '@/libs/supabase/api/todos';
+import { toast } from 'sonner';
 
 export default function TodoItem({ todo }: { todo: Todo }) {
-  const { removeTodo, editTodo } = useTodoListDispatch()
-  const handleRemove = () => removeTodo(todo.id)
+  const { removeTodo, editTodo } = useTodoListDispatch();
+
+  // 삭제 기능
+  const handleRemove = async () => {
+    const deleteTodoId: Todo['id'] = todo.id;
+    // 비동기 처리
+    await deleteTodo(deleteTodoId);
+    console.log(deleteTodoId);
+
+    // 동기 처리
+    removeTodo(todo.id);
+  };
+
+  // 할 일 완료 여부 토글 기능
   const handleToggle = (e: ChangeEvent<HTMLInputElement>) => {
-    editTodo({ ...todo, done: e.target.checked })
-  }
+    editTodo({ ...todo, done: e.target.checked });
+  };
 
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(false);
 
   const handleEditModeOn = () => {
-    setEditMode(true)
+    setEditMode(true);
     setTimeout(() => {
-      const input = inputRef.current
-      if (input) input.select()
-    }, 0)
-  }
+      const input = inputRef.current;
+      if (input) input.select();
+    }, 0);
+  };
 
-  const handleEditModeOff = useCallback(() => setEditMode(false), [])
+  const handleEditModeOff = useCallback(() => setEditMode(false), []);
 
   if (editMode) {
     return (
@@ -40,7 +54,7 @@ export default function TodoItem({ todo }: { todo: Todo }) {
         onEdit={editTodo}
         onEditModeOff={handleEditModeOff}
       />
-    )
+    );
   }
 
   return (
@@ -78,7 +92,7 @@ export default function TodoItem({ todo }: { todo: Todo }) {
         삭제
       </button>
     </li>
-  )
+  );
 }
 
 function EditMode({
@@ -87,36 +101,36 @@ function EditMode({
   onEdit,
   onEditModeOff,
 }: {
-  ref: RefObject<HTMLInputElement | null>
-  todo: Todo
-  onEdit: (editTodo: Todo) => void
-  onEditModeOff: () => void
+  ref: RefObject<HTMLInputElement | null>;
+  todo: Todo;
+  onEdit: (editTodo: Todo) => void;
+  onEditModeOff: () => void;
 }) {
   const handleEdit = useCallback(() => {
-    const input = ref.current
+    const input = ref.current;
 
     if (input) {
-      const editTodo = { ...todo, doit: input.value }
-      onEdit(editTodo)
-      onEditModeOff()
+      const editTodo = { ...todo, doit: input.value };
+      onEdit(editTodo);
+      onEditModeOff();
     }
-  }, [onEdit, onEditModeOff, todo, ref])
+  }, [onEdit, onEditModeOff, todo, ref]);
 
   useEffect(() => {
-    const input = ref.current
-    if (!input) return
+    const input = ref.current;
+    if (!input) return;
 
     const handleActions = ({ key }: globalThis.KeyboardEvent) => {
-      if (key === 'Enter') handleEdit()
-      if (key === 'Escape') onEditModeOff()
-    }
+      if (key === 'Enter') handleEdit();
+      if (key === 'Escape') onEditModeOff();
+    };
 
-    input.addEventListener('keydown', handleActions)
+    input.addEventListener('keydown', handleActions);
 
     return () => {
-      input.removeEventListener('keydown', handleActions)
-    }
-  }, [handleEdit, onEditModeOff, ref])
+      input.removeEventListener('keydown', handleActions);
+    };
+  }, [handleEdit, onEditModeOff, ref]);
 
   return (
     <li className={S.listItem} data-list-item-edit-mode>
@@ -132,5 +146,5 @@ function EditMode({
         저장
       </button>
     </li>
-  )
+  );
 }
