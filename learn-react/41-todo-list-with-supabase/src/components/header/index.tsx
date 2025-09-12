@@ -1,34 +1,49 @@
-import { useState } from 'react'
-import { Dialog } from '@/components'
-import { SignInForm, SignUpForm } from '@/components/form'
-import { useAuth, useAuthDispatch } from '@/contexts/auth'
-import { useToggleState } from '@/hooks'
-import { tw } from '@/utils'
-import SupabaseLogo from './supabase-logo'
+import { useState } from 'react';
+import { Dialog } from '@/components';
+import { SignInForm, SignUpForm } from '@/components/form';
+import { useAuth, useAuthDispatch } from '@/contexts/auth';
+import { useToggleState } from '@/hooks';
+import { tw } from '@/utils';
+import SupabaseLogo from './supabase-logo';
+import { useTodoListDispatch } from '@/guides/todo-list-app/context';
+import { toast } from 'sonner';
 
-type FormType = 'signin' | 'signup'
+type FormType = 'signin' | 'signup';
 
 export default function Header() {
   // 인증 컨텍스트 사용
-  const { user, isLoading } = useAuth()
-  const { signOut } = useAuthDispatch()
+  const { user, isLoading } = useAuth();
+  const { signOut } = useAuthDispatch();
+  const { setTodos } = useTodoListDispatch();
 
   // 다이얼로그 열기 상태
-  const [isOpen, { toggle: toggleDialog }] = useToggleState(false)
+  const [isOpen, { toggle: toggleDialog }] = useToggleState(false);
 
   // 다이얼로그 닫을 때 기본 폼으로 초기화
   const handleCloseDialog = () => {
-    toggleDialog()
+    toggleDialog();
     // 다이얼로그가 닫히면 기본 폼 타입(로그인)으로 초기화
-    setTimeout(() => setFormType('signin'), 300)
-  }
+    setTimeout(() => setFormType('signin'), 300);
+  };
 
   // 폼 전환 상태
-  const [formType, setFormType] = useState<FormType>('signin')
+  const [formType, setFormType] = useState<FormType>('signin');
 
   // 폼 타입 전환 함수
-  const switchToSignIn = () => setFormType('signin')
-  const switchToSignUp = () => setFormType('signup')
+  const switchToSignIn = () => setFormType('signin');
+  const switchToSignUp = () => setFormType('signup');
+
+  // 로그아웃 이벤트 핸들러
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+
+    if (error) {
+      toast.error(error.message);
+    }
+
+    // UI를 초기 상태로 복구
+    setTodos([]);
+  };
 
   return (
     <header className="fixed w-full top-0 left-0 z-10 bg-white shadow-sm">
@@ -52,7 +67,7 @@ export default function Header() {
               </span>
               <button
                 type="button"
-                onClick={signOut}
+                onClick={handleSignOut}
                 disabled={isLoading}
                 className={tw(
                   'px-4 py-2 rounded',
@@ -98,5 +113,5 @@ export default function Header() {
         </Dialog>
       )}
     </header>
-  )
+  );
 }

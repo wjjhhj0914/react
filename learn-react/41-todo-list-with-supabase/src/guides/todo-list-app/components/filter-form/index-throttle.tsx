@@ -1,4 +1,5 @@
 import { ChangeEvent, KeyboardEvent } from 'react';
+import { throttle } from '@/utils';
 import { useTodoList, useTodoListDispatch } from '../../context';
 import S from './style.module.css';
 
@@ -29,7 +30,7 @@ export default function FilterForm() {
           type="search"
           id="todo-name"
           defaultValue={search}
-          onChange={handleSearch}
+          onChange={throttle(handleSearch)}
           onKeyDown={handleEscape}
         />
       </div>
