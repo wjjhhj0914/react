@@ -1,14 +1,32 @@
 // 🚀 Supabase의 Todos 테이블용 클라이언트 API
 // ---------------------------------------------------------
 
+import { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import supabase, { type Todo, TodoInsert, TodoUpdate } from '../index';
 
+// 사용자 (세션) 정보 가져오기
+const requiredUser = async (): Promise<User> => {
+  const { error, data } = await supabase.auth.getUser();
+
+  if (error) {
+    const errorMessage = '로그인이 필요합니다!';
+    toast.error(`${errorMessage} ${error.message}`);
+    throw new Error(errorMessage);
+  }
+
+  const { user } = data;
+  return user;
+};
+
 // Create
 export const createTodo = async (newTodo: TodoInsert): Promise<Todo> => {
+  // 서버에 요청하기 전에 인증된 사용자인지 검증!
+  const user = await requiredUser();
+
   const { error, data: createTodo } = await supabase
     .from('todos')
-    .insert([newTodo])
+    .insert([/* 생성할 새로운 할 일 */ { ...newTodo, user_id: user.id }])
     .select('*')
     .single();
 
@@ -23,6 +41,8 @@ export const createTodo = async (newTodo: TodoInsert): Promise<Todo> => {
 
 // Read
 export const readTodos = async (): Promise<Todo[]> => {
+  const user = await requiredUser();
+
   const { error, data: todos } = await supabase
     .from('todos')
     .select('*')
