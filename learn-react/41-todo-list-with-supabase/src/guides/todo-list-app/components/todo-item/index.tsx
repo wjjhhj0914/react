@@ -1,19 +1,19 @@
 import {
   ChangeEvent,
   RefObject,
+  memo,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react';
+import type { Todo } from '@/libs/supabase';
+import { deleteTodo, updateTodo } from '@/libs/supabase/api/todos';
 import { tw } from '@/utils';
 import { useTodoListDispatch } from '../../context';
-import { type Todo } from '../../reducer';
 import S from './style.module.css';
-import { deleteTodo, updateTodo } from '@/libs/supabase/api/todos';
-import { toast } from 'sonner';
 
-export default function TodoItem({ todo }: { todo: Todo }) {
+function TodoItem({ todo }: { todo: Todo }) {
   const { removeTodo, editTodo } = useTodoListDispatch();
 
   // 할 일 삭제 기능 (비동기 함수로 변경)
@@ -100,6 +100,8 @@ export default function TodoItem({ todo }: { todo: Todo }) {
   );
 }
 
+export default memo(TodoItem);
+
 function EditMode({
   ref,
   todo,
@@ -116,10 +118,12 @@ function EditMode({
     const input = ref.current;
 
     if (input) {
-      // 비동기 요청 (Supabase 데이터베이스인 Todos 테이블의 행 데이터 업데이트)
+      // 비동기 요청
+      // Supabase 데이터베이스인 Todos 테이블의 행 데이터 업데이트
       const updatedTodo = await updateTodo({ id: todo.id, doit: input.value });
 
-      // 동기 요청 (TodoList Context의 상태 업데이트)
+      // 동기 요청
+      // TodoList 컨텍스트 상태 업데이트
       onEdit(updatedTodo);
 
       // 편집 모드 종료 (일반 모드로 변경)

@@ -1,15 +1,15 @@
-import { FormEvent } from 'react';
+import { FormEvent, memo } from 'react';
+import { Todo } from '@/libs/supabase';
+import { createTodo } from '@/libs/supabase/api/todos';
 import { tw } from '@/utils';
 import { useTodoListDispatch } from '../../context';
 import S from './style.module.css';
-import { Todo } from '@/libs/supabase';
-import { createTodo } from '@/libs/supabase/api/todos';
 
-export default function NewTodoForm() {
+function NewTodoForm() {
   // 클라이언트 앱 화면 업데이트 함수
   const { addTodo } = useTodoListDispatch();
 
-  // form 제출 함수를 비동기 함수로 변경 (Supabase에 비동기 요청하기 위해!)
+  // 폼 제출 함수를 비동기 함수로 변경 (Supabase에 비동기 요청하기 위해)
   const handleAddTodo = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -17,16 +17,14 @@ export default function NewTodoForm() {
     const formData = new FormData(form);
     const doit = formData.get('todo-input') as Todo['doit'];
 
-    // Client -> Server 데이터 생성 요청
     // [비동기 요청/응답]
-    // Supabase 서버의 데이터베이스에 새로운 행(row) 데이터 추가 요청 함수
-    // 생성된 데이터임
+    // 클라이언트 -> 서버 데이터 생성 요청
     const createdTodo: Todo = await createTodo({ doit });
 
     // 비동기 요청 기다리는 중....
 
     // [동기 처리]
-    // TodoList Context의 todos 상태에 새로운 Server에서 응답 받은 새로운 할 일을 추가
+    // TodoList 컨텍스트의 todos 상태에 서버에서 응답받은 새로운 할 일 추가
     addTodo(createdTodo);
 
     form.reset();
@@ -49,3 +47,5 @@ export default function NewTodoForm() {
     </section>
   );
 }
+
+export default memo(NewTodoForm);

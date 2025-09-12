@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import {
   type PropsWithChildren,
   createContext,
@@ -7,7 +6,8 @@ import {
   useMemo,
 } from 'react';
 import { useImmerReducer } from 'use-immer';
-import type { TodoUpdate, Todo, TodoInsert } from '@/libs/supabase';
+import { useAuth } from '@/contexts/auth';
+import type { Todo } from '@/libs/supabase';
 import { readTodos } from '@/libs/supabase/api/todos';
 import {
   type State,
@@ -24,12 +24,12 @@ import {
   toggleDoneAction,
 } from './reducer';
 
-interface TodoListDispatchContextValue {
-  // server
+interface TodoListDispatchContextValueValue {
+  // 서버 측 데이터(server data) 상태
   addTodo: (newTodo: Todo) => void;
   removeTodo: (removeId: Todo['id']) => void;
   editTodo: (editTodo: Todo) => void;
-  // client
+  // 클라이언트 측 데이터(client data) 상태
   searchTodos: (search: State['search']) => void;
   toggleDone: () => void;
 }
@@ -38,7 +38,7 @@ const TodoListContext = createContext<State | null>(null);
 TodoListContext.displayName = 'TodoListContext';
 
 const TodoListDispatchContext =
-  createContext<TodoListDispatchContextValue | null>(null);
+  createContext<TodoListDispatchContextValueValue | null>(null);
 TodoListDispatchContext.displayName = 'TodoListDispatchContext';
 
 export default function TodoListProvider({
@@ -47,10 +47,19 @@ export default function TodoListProvider({
 }: PropsWithChildren<{ persist?: boolean }>) {
   const [state, dispatch] = useImmerReducer(reducer, initialState, init);
 
-  // [부수효과] Supabase 데이터베이스의 Todos 테이블 행(row) 데이터 조회 요청
+  const { isAuthenticated, user } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('로그인');
+    } else {
+      console.log('로그아웃');
+    }
+  }, [dispatch, isAuthenticated, user]);
+
+  // [부수효과] Supabase 데이터베이스의 Todos 테이블 행(rows) 데이터 조회 요청
   useEffect(() => {
     readTodos().then(todos => {
-      console.log(todos);
       dispatch(setTodosAction(todos));
     });
   }, [dispatch]);
@@ -93,7 +102,7 @@ export default function TodoListProvider({
   );
 }
 
-// 상태 내보내주는 코드
+/* eslint-disable react-refresh/only-export-components */
 export const useTodoList = () => {
   const state = useContext(TodoListContext);
 
