@@ -107,3 +107,19 @@ export const uploadProfilePublicUrl = async (
 
   return publicUrl;
 };
+
+export const updateProfileImage = async (
+  publicUrl: Profile['profile_image']
+): Promise<void> => {
+  const user = await requiredUser();
+  const { error: updateProfileError } = await supabase
+    .from('profiles')
+    .update({ profile_image: publicUrl })
+    .eq('id', user.id);
+
+  if (updateProfileError) {
+    const errorMessage = `프로필 이미지 URL 저장 실패 오류 발생! ${updateProfileError.message}`;
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
