@@ -93,21 +93,41 @@ export default function ProfileUploads({
 
       if (uploadError) {
         const errorMessage = `이미지 업로드 오류 발생! ${uploadError.message}`;
-        toast.error(errorMessage);
+        toast.error(errorMessage, {
+          cancel: { label: '닫기', onClick: () => console.log('닫기') },
+        });
         throw new Error(errorMessage);
       }
 
       // [실습]
       // 업로드된 파일의 공개 URL 가져오기
       // - 파일 경로로 supabase 스토리지 'profiles' 버컷에서 공개된 URL 가져오기
-      const data = { publicUrl: '' };
+      // const data = { publicUrl: '' };
+      const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
       const { publicUrl } = data;
+      console.log({ publicUrl });
 
       // [실습]
       // 프로필 테이블의 이미지 URL 업데이트
       // - 인증된 사용자의 프로필(profiles) 데이터베이스 행 'profile_image' 값에 가져온 URL 값 업데이트
       // - 오류 처리 '프로필 이미지 URL 수정 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
       // - 오류 발생 시, isUploading, uploadProgress 상태 초기화
+      const { error: updateProfileError } = await supabase
+        .from('profiles')
+        .update({
+          profile_image: publicUrl,
+        })
+        .eq('id', user.id);
+
+      if (updateProfileError) {
+        const errorMessage = `프로필 이미지 URL 수정 오류 발생! ${updateProfileError}`;
+        toast.error(errorMessage, {
+          cancel: { label: '닫기', onClick: () => console.log('닫기') },
+        });
+        setIsUploading(false);
+        setUploadProgress(0);
+        throw new Error(errorMessage);
+      }
 
       // 완료 표시
       setUploadProgress(100);
