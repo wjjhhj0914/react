@@ -95,7 +95,7 @@ export default function Profile() {
    * 폼 제출 시 실행되는 함수
    * 사용자 프로필 정보와 이미지를 업데이트합니다.
    */
-  const onSubmit = async (_formData: ProfileFormData) => {
+  const onSubmit = async (formData: ProfileFormData) => {
     if (isSubmitting || !user) return;
 
     setIsSubmitting(true);
@@ -105,6 +105,19 @@ export default function Profile() {
       // 사용자(user) 메타데이터 업데이트
       // - 폼 데이터 값으로 'email', 'data.username', 'data.bio' 업데이트
       // - 오류 처리 '프로필 업데이트 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
+      const { error: authUpdateError } = await supabase.auth.updateUser({
+        email: formData.email,
+        data: {
+          username: formData.username,
+          bio: formData.bio,
+        },
+      });
+
+      if (authUpdateError) {
+        const errorMessage = `프로필 업데이트 오류 발생! ${authUpdateError.message}`;
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
 
       // [실습]
       // 프로필(profiles) 테이블 업데이트
