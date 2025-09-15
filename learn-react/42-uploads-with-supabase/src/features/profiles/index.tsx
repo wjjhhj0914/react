@@ -124,20 +124,34 @@ export default function Profile() {
       // - 폼 데이터로 'username', 'email', 'bio', 'updated_at' 업데이트
       // - 인증된 사용자의 프로필 행을 찾아 업데이트
       // - 오류 처리 '프로필 테이블 업데이트 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
-      const { error: profileUpdateError } = await supabase
-        .from('profiles')
-        .update({
-          username: formData.username,
-          email: formData.email,
-          bio: formData.bio,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
+      const { error: profileUpdateError, data: updatedProfileData } =
+        await supabase
+          .from('profiles')
+          .update({
+            username: formData.username,
+            email: formData.email,
+            bio: formData.bio,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id)
+          .select('username, email, bio')
+          .single();
 
       if (profileUpdateError) {
         const errorMessage = `프로필 테이블 업데이트 오류 발생! ${profileUpdateError.message}`;
         toast.error(errorMessage);
         throw new Error(errorMessage);
+      }
+
+      // 폼 데이터를 응답받은 profiles 테이블의 데이터로 재설정
+      const { username, email, bio } = updatedProfileData;
+
+      if (email) {
+        reset({
+          username,
+          email,
+          bio,
+        });
       }
 
       // [실습]
