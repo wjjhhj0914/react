@@ -10,6 +10,7 @@ import EmailInput from './components/email-input';
 import ProfileUploads from './components/profile-uploads';
 import UsernameInput from './components/username-input';
 import type { ProfileFormData } from './type';
+import { getUserDataFromProfileDB } from '@/libs/supabase/api/profiles';
 
 /**
  * 사용자 프로필 관리 컴포넌트
@@ -51,18 +52,7 @@ export default function Profile() {
           // - 단 하나의 행(row) 데이터만 가져오기
           // - 오류 처리 '로그인된 사용자 정보를 가져올 수 없습니다. {에러.메시지}'
           // const data = { username: '', email: '', bio: '', profile_image: null }
-          const { error: profileError, data: profileData } = await supabase
-            .from('profiles')
-            .select('username, email, bio, profile_image')
-            .eq('id', user.id)
-            .single();
-
-          if (profileError) {
-            const errorMessage = `로그인된 사용자 정보를 가져올 수 없습니다. ${profileError.message}`;
-            toast.error(errorMessage, {
-              cancel: { label: '닫기', onClick: () => console.log('닫기') },
-            });
-          }
+          const profileData = await getUserDataFromProfileDB();
 
           if (!profileData) return;
 
