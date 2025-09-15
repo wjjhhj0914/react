@@ -102,10 +102,9 @@ export default function ProfileUploads({
       // [실습]
       // 업로드된 파일의 공개 URL 가져오기
       // - 파일 경로로 supabase 스토리지 'profiles' 버컷에서 공개된 URL 가져오기
-      // const data = { publicUrl: '' };
+      // const data = { publicUrl: '' }
       const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
       const { publicUrl } = data;
-      console.log({ publicUrl });
 
       // [실습]
       // 프로필 테이블의 이미지 URL 업데이트
@@ -114,9 +113,7 @@ export default function ProfileUploads({
       // - 오류 발생 시, isUploading, uploadProgress 상태 초기화
       const { error: updateProfileError } = await supabase
         .from('profiles')
-        .update({
-          profile_image: publicUrl,
-        })
+        .update({ profile_image: publicUrl })
         .eq('id', user.id);
 
       if (updateProfileError) {
@@ -176,13 +173,11 @@ export default function ProfileUploads({
       // - 오류 처리 '데이터베이스에서 이미지 경로 null 수정 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
       const { error: updateProfileError } = await supabase
         .from('profiles')
-        .update({
-          profile_image: null,
-        })
+        .update({ profile_image: null })
         .eq('id', user.id);
 
       if (updateProfileError) {
-        const errorMessage = `스토리지에서 이미지 삭제 오류 발생! ${updateProfileError.message}`;
+        const errorMessage = `데이터베이스에서 이미지 경로 null 수정 오류 발생! ${updateProfileError.message}`;
         toast.error(errorMessage, {
           cancel: { label: '닫기', onClick: () => console.log('닫기') },
         });

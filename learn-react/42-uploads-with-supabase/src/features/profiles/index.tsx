@@ -3,13 +3,13 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '@/contexts/auth';
+import supabase from '@/libs/supabase';
 import { tw } from '@/utils';
 import BioTextarea from './components/bio-textarea';
 import EmailInput from './components/email-input';
 import ProfileUploads from './components/profile-uploads';
 import UsernameInput from './components/username-input';
 import type { ProfileFormData } from './type';
-import supabase from '@/libs/supabase';
 
 /**
  * 사용자 프로필 관리 컴포넌트
@@ -102,7 +102,7 @@ export default function Profile() {
 
     try {
       // [실습]
-      // 사용자(user)에 대한 메타데이터 업데이트
+      // 사용자(user) 메타데이터 업데이트
       // - 폼 데이터 값으로 'email', 'data.username', 'data.bio' 업데이트
       // - 오류 처리 '프로필 업데이트 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
       const { error: authUpdateError } = await supabase.auth.updateUser({
@@ -127,6 +127,7 @@ export default function Profile() {
       const { error: profileUpdateError, data: updatedProfileData } =
         await supabase
           .from('profiles')
+          // RLS 보안 정책 없어요! (수정 불가능 오류)
           .update({
             username: formData.username,
             email: formData.email,
@@ -176,7 +177,14 @@ export default function Profile() {
                 const oldFilePath = `${user.id}/${oldFileName}`;
                 // [실습]
                 // supabase 스토리지 'profiles' 버킷에서 이전 프로필 이미지 삭제
-                console.log(oldFilePath);
+                const { error } = await supabase.storage
+                  .from('profiles')
+                  .remove([oldFilePath]);
+                if (error) {
+                  const errorMessage = `이전 프로필 이미지 삭제 오류 발생! ${error.message}`;
+                  toast.error(errorMessage);
+                  throw new Error(errorMessage);
+                }
               }
             }
 
@@ -190,18 +198,39 @@ export default function Profile() {
             // [실습]
             // supabase 스토리지 'profiles' 버킷에 파일 경로로 선택된 파일 업로드
             // - 오류 처리 '이미지 업로드 실패! {오류.메시지}'
-            console.log(filePath);
+            const { error: uploadProfileError } = await supabase.storage
+              .from('profiles')
+              .upload(filePath, selectedFile);
+
+            if (uploadProfileError) {
+              const errorMessage = `프로필 이미지 업로드 실패 오류 발생! ${uploadProfileError.message}`;
+              toast.error(errorMessage);
+              throw new Error(errorMessage);
+            }
 
             // [실습]
             // 업로드된 파일의 공개 URL 가져오기
             // - supabase 스토리지 'profiles' 버킷에서 파일 경로로 공개된 URL 가져오기
-            const data = { publicUrl: '' };
+            const { data } = supabase.storage
+              .from('profiles')
+              .getPublicUrl(filePath);
+
             const { publicUrl } = data;
 
             // [실습]
             // 프로필(profiles) 테이블의 이미지 URL 업데이트
             // - 인증된 사용자 행에 profile_image 필드에 업데이트
             // - 오류 처리 '프로필 이미지 URL 저장 실패! {오류.메시지}' -> 오류 발생 시, 함수 종료
+            const { error: updateProfileError } = await supabase
+              .from('profiles')
+              .update({ profile_image: publicUrl })
+              .eq('id', user.id);
+
+            if (updateProfileError) {
+              const errorMessage = `프로필 이미지 URL 저장 실패 오류 발생! ${updateProfileError.message}`;
+              toast.error(errorMessage);
+              throw new Error(errorMessage);
+            }
 
             // 상태 업데이트
             setProfileImage(publicUrl);
