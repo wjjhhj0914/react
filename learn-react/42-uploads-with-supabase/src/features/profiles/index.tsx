@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/auth';
 import supabase from '@/libs/supabase';
 import {
   getUserDataFromProfileDB,
+  removePreviousProfileImage,
   updateProfileTable,
   updateUserMetadata,
 } from '@/libs/supabase/api/profiles';
@@ -131,22 +132,7 @@ export default function Profile() {
 
           try {
             // 이전 프로필 이미지가 있으면 삭제
-            if (profileImage) {
-              const oldFileName = profileImage.split('/').pop();
-              if (oldFileName) {
-                const oldFilePath = `${user.id}/${oldFileName}`;
-                // [실습]
-                // supabase 스토리지 'profiles' 버킷에서 이전 프로필 이미지 삭제
-                const { error } = await supabase.storage
-                  .from('profiles')
-                  .remove([oldFilePath]);
-                if (error) {
-                  const errorMessage = `이전 프로필 이미지 삭제 오류 발생! ${error.message}`;
-                  toast.error(errorMessage);
-                  throw new Error(errorMessage);
-                }
-              }
-            }
+            await removePreviousProfileImage(profileImage);
 
             // 파일 확장자 추출
             const fileExt = selectedFile.name.split('.').pop();

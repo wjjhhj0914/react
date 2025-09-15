@@ -65,3 +65,24 @@ export const updateProfileTable = async (
 
   return data;
 };
+
+export const removePreviousProfileImage = async (
+  profileImage: string | null
+) => {
+  const user = await requiredUser();
+
+  if (profileImage) {
+    const oldFileName = profileImage.split('/').pop();
+    if (oldFileName) {
+      const oldFilePath = `${user.id}/${oldFileName}`;
+      const { error } = await supabase.storage
+        .from('profiles')
+        .remove([oldFilePath]);
+      if (error) {
+        const errorMessage = `이전 프로필 이미지 삭제 오류 발생! ${error.message}`;
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+    }
+  }
+};
