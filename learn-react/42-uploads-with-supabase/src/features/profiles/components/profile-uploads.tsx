@@ -156,14 +156,38 @@ export default function ProfileUploads({
       const filePath = `${user.id}/${fileName}`;
 
       // [실습]
-      // supabase 스토리지 'profiles' 버컷에서 파일 경로 삭제
+      // supabase 스토리지 'profiles' 버킷에서 파일 경로 삭제
       // - 오류 처리 '스토리지에서 이미지 삭제 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
-      console.log(filePath);
+      const { error: removeProfileError } = await supabase.storage
+        .from('profiles')
+        .remove([filePath]);
+
+      if (removeProfileError) {
+        const errorMessage = `스토리지에서 이미지 삭제 오류 발생! ${removeProfileError.message}`;
+        toast.error(errorMessage, {
+          cancel: { label: '닫기', onClick: () => console.log('닫기') },
+        });
+        throw new Error(errorMessage);
+      }
 
       // [실습]
       // 프로필(profiles) 데이터베이스 프로필 이미지 경로 값을 null로 업데이트
       // - 인증된 사용자의 행 데이터 업데이트
       // - 오류 처리 '데이터베이스에서 이미지 경로 null 수정 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
+      const { error: updateProfileError } = await supabase
+        .from('profiles')
+        .update({
+          profile_image: null,
+        })
+        .eq('id', user.id);
+
+      if (updateProfileError) {
+        const errorMessage = `스토리지에서 이미지 삭제 오류 발생! ${updateProfileError.message}`;
+        toast.error(errorMessage, {
+          cancel: { label: '닫기', onClick: () => console.log('닫기') },
+        });
+        throw new Error(errorMessage);
+      }
 
       // 상태 업데이트
       setProfileImage(null);
