@@ -102,7 +102,7 @@ export default function Profile() {
 
     try {
       // [실습]
-      // 사용자(user) 메타데이터 업데이트
+      // 사용자(user)에 대한 메타데이터 업데이트
       // - 폼 데이터 값으로 'email', 'data.username', 'data.bio' 업데이트
       // - 오류 처리 '프로필 업데이트 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
       const { error: authUpdateError } = await supabase.auth.updateUser({
@@ -124,6 +124,21 @@ export default function Profile() {
       // - 폼 데이터로 'username', 'email', 'bio', 'updated_at' 업데이트
       // - 인증된 사용자의 프로필 행을 찾아 업데이트
       // - 오류 처리 '프로필 테이블 업데이트 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
+      const { error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update({
+          username: formData.username,
+          email: formData.email,
+          bio: formData.bio,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (profileUpdateError) {
+        const errorMessage = `프로필 테이블 업데이트 오류 발생! ${profileUpdateError.message}`;
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
 
       // [실습]
       // 선택한 프로필 이미지 파일 업로드
