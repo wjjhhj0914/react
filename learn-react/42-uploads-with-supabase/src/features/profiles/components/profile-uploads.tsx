@@ -9,6 +9,11 @@ import { LucideTrash, LucideUpload } from 'lucide-react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import supabase from '@/libs/supabase';
+import {
+  removePreviousProfileImage,
+  updateProfilImage,
+  uploadProfilePublicUrl,
+} from '@/libs/supabase/api/profiles';
 import { tw } from '@/utils';
 
 interface Props {
@@ -26,21 +31,17 @@ export default function ProfileUploads({
   profileImage,
   setProfileImage,
 }: Props) {
-  // 업로드 상태
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  // 업로드 진행 상태
+
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
-  // 파일 변경 이벤트 핸들러
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
     if (files && files.length > 0) setSelectedFile(files[0]);
   };
 
-  // 선택된 파일 상태 초기화
   const removeSelectedFile = () => setSelectedFile(null);
 
-  // 프로필 이미지 업로드 기능
   const uploadProfileImage = async () => {
     if (!user || !selectedFile) return;
 
@@ -48,31 +49,12 @@ export default function ProfileUploads({
     setUploadProgress(0);
 
     try {
-      // 기존 이미지가 있으면 삭제
-      if (profileImage) {
-        const fileName = profileImage.split('/').pop() || '';
-        const filePath = `${user.id}/${fileName}`;
+      if (profileImage) await removePreviousProfileImage(profileImage);
 
-        // supabase 스토리지 'profiles' 버컷에서 기존 파일 경로 삭제
-        const { error } = await supabase.storage
-          .from('profiles')
-          .remove([filePath]);
-
-        if (error) {
-          const errorMessage = `기존 프로필 이미지 파일 삭제 실패 오류 발생! ${error.message}`;
-          toast.error(errorMessage, {
-            cancel: { label: '닫기', onClick: () => console.log('닫기') },
-          });
-          throw new Error(errorMessage);
-        }
-      }
-
-      // 파일 확장자 추출 및 고유 파일명 생성
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${uuidv4()}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
 
-      // 업로드 진행률 시뮬레이션
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           const newProgress = prev + 10;
@@ -80,53 +62,12 @@ export default function ProfileUploads({
         });
       }, 300);
 
-      // [실습]
-      // 파일 업로드
-      // - supabase 스토리지 'profiles' 버킷에 파일 경로로 선택된 파일 업로드
-      // - 오류 처리 '이미지 업로드 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
-      // - 오류 발생 시, isUploading, uploadProgress 상태 초기화
-      const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, selectedFile);
+      const publicUrl = await uploadProfilePublicUrl(filePath, selectedFile);
 
       clearInterval(progressInterval);
 
-      if (uploadError) {
-        const errorMessage = `이미지 업로드 오류 발생! ${uploadError.message}`;
-        toast.error(errorMessage, {
-          cancel: { label: '닫기', onClick: () => console.log('닫기') },
-        });
-        throw new Error(errorMessage);
-      }
+      await updateProfilImage(publicUrl);
 
-      // [실습]
-      // 업로드된 파일의 공개 URL 가져오기
-      // - 파일 경로로 supabase 스토리지 'profiles' 버컷에서 공개된 URL 가져오기
-      // const data = { publicUrl: '' }
-      const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
-      const { publicUrl } = data;
-
-      // [실습]
-      // 프로필 테이블의 이미지 URL 업데이트
-      // - 인증된 사용자의 프로필(profiles) 데이터베이스 행 'profile_image' 값에 가져온 URL 값 업데이트
-      // - 오류 처리 '프로필 이미지 URL 수정 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
-      // - 오류 발생 시, isUploading, uploadProgress 상태 초기화
-      const { error: updateProfileError } = await supabase
-        .from('profiles')
-        .update({ profile_image: publicUrl })
-        .eq('id', user.id);
-
-      if (updateProfileError) {
-        const errorMessage = `프로필 이미지 URL 수정 오류 발생! ${updateProfileError}`;
-        toast.error(errorMessage, {
-          cancel: { label: '닫기', onClick: () => console.log('닫기') },
-        });
-        setIsUploading(false);
-        setUploadProgress(0);
-        throw new Error(errorMessage);
-      }
-
-      // 완료 표시
       setUploadProgress(100);
       setTimeout(() => {
         setProfileImage(publicUrl);
@@ -143,18 +84,13 @@ export default function ProfileUploads({
     }
   };
 
-  // 프로필 이미지 삭제 기능
   const removeProfileImage = async () => {
     if (!user || !profileImage) return;
 
     try {
-      // URL에서 파일 이름 추출
       const fileName = profileImage.split('/').pop() || '';
       const filePath = `${user.id}/${fileName}`;
 
-      // [실습]
-      // supabase 스토리지 'profiles' 버킷에서 파일 경로 삭제
-      // - 오류 처리 '스토리지에서 이미지 삭제 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
       const { error: removeProfileError } = await supabase.storage
         .from('profiles')
         .remove([filePath]);
@@ -167,10 +103,6 @@ export default function ProfileUploads({
         throw new Error(errorMessage);
       }
 
-      // [실습]
-      // 프로필(profiles) 데이터베이스 프로필 이미지 경로 값을 null로 업데이트
-      // - 인증된 사용자의 행 데이터 업데이트
-      // - 오류 처리 '데이터베이스에서 이미지 경로 null 수정 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
       const { error: updateProfileError } = await supabase
         .from('profiles')
         .update({ profile_image: null })
@@ -184,7 +116,6 @@ export default function ProfileUploads({
         throw new Error(errorMessage);
       }
 
-      // 상태 업데이트
       setProfileImage(null);
       toast.success('프로필 이미지가 삭제되었습니다.');
     } catch (error) {
