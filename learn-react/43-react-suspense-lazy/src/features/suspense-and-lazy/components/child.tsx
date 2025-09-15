@@ -1,43 +1,43 @@
-import { useEffect, useState } from 'react'
-import { LucideLoader, LucideShieldAlert } from 'lucide-react'
-import { tw } from '@/utils'
-import { getData } from '../api'
+import { useEffect, useState } from 'react';
+import { LucideLoader, LucideShieldAlert } from 'lucide-react';
+import { tw } from '@/utils';
+import { getData } from '../api';
 
 export default function Child({ cutoff }: { cutoff: number }) {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<Error | null>(null)
-  const [data, setData] = useState<number[]>([])
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<number[]>([]);
 
   useEffect(() => {
-    let ignore = false
-    setLoading(true)
-    setError(null)
+    let ignore = false;
+    setLoading(true);
+    setError(null);
 
     getData(cutoff)
-      .then((data) => {
-        console.log(data)
+      .then(data => {
+        console.log(data);
         if (!ignore) {
-          setData(data)
+          setData(data);
         }
       })
-      .catch((error) => {
-        setError(error as Error)
+      .catch(error => {
+        setError(error as Error);
       })
       .finally(() => {
-        setLoading(false)
-      })
+        setLoading(false);
+      });
 
     return () => {
-      ignore = true
-    }
-  }, [cutoff])
+      ignore = true;
+    };
+  }, [cutoff]);
 
   if (loading) {
     return (
       <div role="status" aria-label="로딩 중...">
         <LucideLoader className="my-4 size-6 animate-spin opacity-70" />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -46,14 +46,8 @@ export default function Child({ cutoff }: { cutoff: number }) {
         <LucideShieldAlert className="my-4 size-6" />
         {error.message}
       </div>
-    )
+    );
   }
-
-  // [실습]
-  // Suspense를 지원하는 쿼리 훅을 사용
-  // - queryKey: ['data', cutoff]
-  // - queryFn: getData(cutoff)
-  // - retry: false
 
   return (
     <ul className="list-none pl-0 flex flex-col gap-y-1">
@@ -69,5 +63,5 @@ export default function Child({ cutoff }: { cutoff: number }) {
         </li>
       ))}
     </ul>
-  )
+  );
 }
