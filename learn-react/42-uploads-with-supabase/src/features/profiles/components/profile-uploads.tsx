@@ -1,21 +1,22 @@
-import type { User } from '@supabase/supabase-js'
+import type { User } from '@supabase/supabase-js';
 import {
   type ChangeEvent,
   type Dispatch,
   type SetStateAction,
   useState,
-} from 'react'
-import { LucideTrash, LucideUpload } from 'lucide-react'
-import { toast } from 'sonner'
-import { v4 as uuidv4 } from 'uuid'
-import { tw } from '@/utils'
+} from 'react';
+import { LucideTrash, LucideUpload } from 'lucide-react';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import supabase from '@/libs/supabase';
+import { tw } from '@/utils';
 
 interface Props {
-  user: User
-  selectedFile: File | null
-  setSelectedFile: Dispatch<SetStateAction<File | null>>
-  profileImage: string | null
-  setProfileImage: Dispatch<SetStateAction<string | null>>
+  user: User;
+  selectedFile: File | null;
+  setSelectedFile: Dispatch<SetStateAction<File | null>>;
+  profileImage: string | null;
+  setProfileImage: Dispatch<SetStateAction<string | null>>;
 }
 
 export default function ProfileUploads({
@@ -26,63 +27,81 @@ export default function ProfileUploads({
   setProfileImage,
 }: Props) {
   // 업로드 상태
-  const [isUploading, setIsUploading] = useState<boolean>(false)
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   // 업로드 진행 상태
-  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   // 파일 변경 이벤트 핸들러
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { files } = event.target
-    if (files && files.length > 0) setSelectedFile(files[0])
-  }
+    const { files } = event.target;
+    if (files && files.length > 0) setSelectedFile(files[0]);
+  };
 
   // 선택된 파일 상태 초기화
-  const removeSelectedFile = () => setSelectedFile(null)
+  const removeSelectedFile = () => setSelectedFile(null);
 
   // 프로필 이미지 업로드 기능
   const uploadProfileImage = async () => {
-    if (!user || !selectedFile) return
+    if (!user || !selectedFile) return;
 
-    setIsUploading(true)
-    setUploadProgress(0)
+    setIsUploading(true);
+    setUploadProgress(0);
 
     try {
       // 기존 이미지가 있으면 삭제
       if (profileImage) {
-        const fileName = profileImage.split('/').pop() || ''
-        const filePath = `${user.id}/${fileName}`
+        const fileName = profileImage.split('/').pop() || '';
+        const filePath = `${user.id}/${fileName}`;
 
         // supabase 스토리지 'profiles' 버컷에서 기존 파일 경로 삭제
-        console.log(filePath)
+        const { error } = await supabase.storage
+          .from('profiles')
+          .remove([filePath]);
+
+        if (error) {
+          const errorMessage = `기존 프로필 이미지 파일 삭제 실패 오류 발생! ${error.message}`;
+          toast.error(errorMessage, {
+            cancel: { label: '닫기', onClick: () => console.log('닫기') },
+          });
+          throw new Error(errorMessage);
+        }
       }
 
       // 파일 확장자 추출 및 고유 파일명 생성
-      const fileExt = selectedFile.name.split('.').pop()
-      const fileName = `${uuidv4()}.${fileExt}`
-      const filePath = `${user.id}/${fileName}`
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // 업로드 진행률 시뮬레이션
       const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          const newProgress = prev + 10
-          return newProgress >= 90 ? 90 : newProgress
-        })
-      }, 300)
+        setUploadProgress(prev => {
+          const newProgress = prev + 10;
+          return newProgress >= 90 ? 90 : newProgress;
+        });
+      }, 300);
 
       // [실습]
       // 파일 업로드
       // - supabase 스토리지 'profiles' 버킷에 파일 경로로 선택된 파일 업로드
       // - 오류 처리 '이미지 업로드 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
       // - 오류 발생 시, isUploading, uploadProgress 상태 초기화
-      console.log(filePath)
+      const { error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, selectedFile);
 
-      clearInterval(progressInterval)
+      clearInterval(progressInterval);
+
+      if (uploadError) {
+        const errorMessage = `이미지 업로드 오류 발생! ${uploadError.message}`;
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
 
       // [실습]
       // 업로드된 파일의 공개 URL 가져오기
       // - 파일 경로로 supabase 스토리지 'profiles' 버컷에서 공개된 URL 가져오기
-      const data = { publicUrl: '' }
-      const { publicUrl } = data
+      const data = { publicUrl: '' };
+      const { publicUrl } = data;
 
       // [실습]
       // 프로필 테이블의 이미지 URL 업데이트
@@ -91,35 +110,35 @@ export default function ProfileUploads({
       // - 오류 발생 시, isUploading, uploadProgress 상태 초기화
 
       // 완료 표시
-      setUploadProgress(100)
+      setUploadProgress(100);
       setTimeout(() => {
-        setProfileImage(publicUrl)
-        setSelectedFile(null)
-        setIsUploading(false)
-        setUploadProgress(0)
-        toast.success('프로필 이미지가 업로드되었습니다.')
-      }, 500)
+        setProfileImage(publicUrl);
+        setSelectedFile(null);
+        setIsUploading(false);
+        setUploadProgress(0);
+        toast.success('프로필 이미지가 업로드되었습니다.');
+      }, 500);
     } catch (error) {
-      console.error('이미지 업로드 중 오류:', error)
-      toast.error('이미지 업로드 중 오류가 발생했습니다.')
-      setIsUploading(false)
-      setUploadProgress(0)
+      console.error('이미지 업로드 중 오류:', error);
+      toast.error('이미지 업로드 중 오류가 발생했습니다.');
+      setIsUploading(false);
+      setUploadProgress(0);
     }
-  }
+  };
 
   // 프로필 이미지 삭제 기능
   const removeProfileImage = async () => {
-    if (!user || !profileImage) return
+    if (!user || !profileImage) return;
 
     try {
       // URL에서 파일 이름 추출
-      const fileName = profileImage.split('/').pop() || ''
-      const filePath = `${user.id}/${fileName}`
+      const fileName = profileImage.split('/').pop() || '';
+      const filePath = `${user.id}/${fileName}`;
 
       // [실습]
       // supabase 스토리지 'profiles' 버컷에서 파일 경로 삭제
       // - 오류 처리 '스토리지에서 이미지 삭제 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
-      console.log(filePath)
+      console.log(filePath);
 
       // [실습]
       // 프로필(profiles) 데이터베이스 프로필 이미지 경로 값을 null로 업데이트
@@ -127,13 +146,13 @@ export default function ProfileUploads({
       // - 오류 처리 '데이터베이스에서 이미지 경로 null 수정 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
 
       // 상태 업데이트
-      setProfileImage(null)
-      toast.success('프로필 이미지가 삭제되었습니다.')
+      setProfileImage(null);
+      toast.success('프로필 이미지가 삭제되었습니다.');
     } catch (error) {
-      console.error('이미지 삭제 중 오류:', error)
-      toast.error('이미지 삭제 중 오류가 발생했습니다.')
+      console.error('이미지 삭제 중 오류:', error);
+      toast.error('이미지 삭제 중 오류가 발생했습니다.');
     }
-  }
+  };
 
   return (
     <>
@@ -161,7 +180,8 @@ export default function ProfileUploads({
                     'rounded-full',
                     'opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity'
                   )}
-                  aria-label="이미지 삭제"
+                  aria-label="프로필 이미지 삭제"
+                  title="프로필 이미지 삭제"
                 >
                   <LucideTrash size={16} />
                 </button>
@@ -264,5 +284,5 @@ export default function ProfileUploads({
         </div>
       </div>
     </>
-  )
+  );
 }
