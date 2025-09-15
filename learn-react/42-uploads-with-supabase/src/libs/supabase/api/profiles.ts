@@ -86,3 +86,24 @@ export const removePreviousProfileImage = async (
     }
   }
 };
+
+export const uploadProfilePublicUrl = async (
+  filePath: string,
+  selectedFile: File
+) => {
+  const { error: uploadProfileError } = await supabase.storage
+    .from('profiles')
+    .upload(filePath, selectedFile);
+
+  if (uploadProfileError) {
+    const errorMessage = `프로필 이미지 업로드 실패 오류 발생! ${uploadProfileError.message}`;
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
+
+  const { publicUrl } = data;
+
+  return publicUrl;
+};

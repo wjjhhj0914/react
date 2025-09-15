@@ -141,27 +141,11 @@ export default function Profile() {
             const fileName = `${uuidv4()}.${fileExt}`;
             const filePath = `${user.id}/${fileName}`;
 
-            // [실습]
-            // supabase 스토리지 'profiles' 버킷에 파일 경로로 선택된 파일 업로드
-            // - 오류 처리 '이미지 업로드 실패! {오류.메시지}'
-            const { error: uploadProfileError } = await supabase.storage
-              .from('profiles')
-              .upload(filePath, selectedFile);
-
-            if (uploadProfileError) {
-              const errorMessage = `프로필 이미지 업로드 실패 오류 발생! ${uploadProfileError.message}`;
-              toast.error(errorMessage);
-              throw new Error(errorMessage);
-            }
-
-            // [실습]
-            // 업로드된 파일의 공개 URL 가져오기
-            // - supabase 스토리지 'profiles' 버킷에서 파일 경로로 공개된 URL 가져오기
-            const { data } = supabase.storage
-              .from('profiles')
-              .getPublicUrl(filePath);
-
-            const { publicUrl } = data;
+            // 프로필 이미지 업로드 후, 오류 없을 경우에는 공개된 URL 주소 가져오기
+            const publicUrl = await uploadProfilePublicUrl(
+              filePath,
+              selectedFile
+            );
 
             // [실습]
             // 프로필(profiles) 테이블의 이미지 URL 업데이트
