@@ -10,7 +10,10 @@ import EmailInput from './components/email-input';
 import ProfileUploads from './components/profile-uploads';
 import UsernameInput from './components/username-input';
 import type { ProfileFormData } from './type';
-import { getUserDataFromProfileDB } from '@/libs/supabase/api/profiles';
+import {
+  getUserDataFromProfileDB,
+  updateUserMetaData,
+} from '@/libs/supabase/api/profiles';
 
 /**
  * 사용자 프로필 관리 컴포넌트
@@ -95,19 +98,7 @@ export default function Profile() {
       // 사용자(user) 메타데이터 업데이트
       // - 폼 데이터 값으로 'email', 'data.username', 'data.bio' 업데이트
       // - 오류 처리 '프로필 업데이트 오류 발생! {오류.메시지}' -> 오류 발생 시, 함수 종료
-      const { error: authUpdateError } = await supabase.auth.updateUser({
-        email: formData.email,
-        data: {
-          username: formData.username,
-          bio: formData.bio,
-        },
-      });
-
-      if (authUpdateError) {
-        const errorMessage = `프로필 업데이트 오류 발생! ${authUpdateError.message}`;
-        toast.error(errorMessage);
-        throw new Error(errorMessage);
-      }
+      await updateUserMetaData(formData.email, formData.username, formData.bio);
 
       // [실습]
       // 프로필(profiles) 테이블 업데이트

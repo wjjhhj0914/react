@@ -23,3 +23,22 @@ export const getUserDataFromProfileDB = async (): Promise<UserData> => {
 
   return data;
 };
+
+export const updateUserMetadata = async (
+  email: Profile['email'],
+  username: Profile['username'],
+  bio: Profile['bio']
+): Promise<void> => {
+  if (!email) return;
+
+  const { error: authUpdateError } = await supabase.auth.updateUser({
+    email,
+    data: { username, bio },
+  });
+
+  if (authUpdateError) {
+    const errorMessage = `프로필 업데이트 오류 발생! ${authUpdateError.message}`;
+    toast.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
