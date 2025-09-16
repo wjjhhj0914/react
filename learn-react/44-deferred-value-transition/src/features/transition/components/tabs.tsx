@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useTransition } from 'react';
 import { performanceDelay, tw } from '@/utils';
 
 type Tab = 'posts' | 'comments' | 'authors';
@@ -9,27 +9,50 @@ export default function Tabs() {
   // [실습]
   // 탭 전환 시, 사용자 입력과 컴포넌트 렌더링을 분리해
   // 사용자 경험을 향상시켜 봅니다.
+  const [isPending, startTransition] = useTransition();
 
   function handleTabChange(nextTab: Tab) {
     // 즉각적인 상태 업데이트 리액트에 요청
-    setTab(nextTab);
+    // setTab(nextTab)
+
+    // 트랜지션 시작
+    startTransition(() => {
+      // [1] 사용자와의 즉각적인 상호작용 우선순위
+      // [2] 렌더링 우선순위를 낮춰서 진행
+      setTab(nextTab);
+    });
   }
 
   return (
     <div className={tw('w-full max-w-3xl mx-auto p-4')}>
       <div className={tw('flex border-b border-gray-200 mb-4')}>
-        <TabButton tab="posts" currentTab={tab} onClick={handleTabChange}>
+        <TabButton
+          tab="posts"
+          currentTab={tab}
+          onClick={handleTabChange}
+          isPending={isPending}
+        >
           게시물
         </TabButton>
-        <TabButton tab="comments" currentTab={tab} onClick={handleTabChange}>
+        <TabButton
+          tab="comments"
+          currentTab={tab}
+          onClick={handleTabChange}
+          isPending={isPending}
+        >
           댓글
         </TabButton>
-        <TabButton tab="authors" currentTab={tab} onClick={handleTabChange}>
+        <TabButton
+          tab="authors"
+          currentTab={tab}
+          onClick={handleTabChange}
+          isPending={isPending}
+        >
           작성자
         </TabButton>
       </div>
 
-      <TabWrapper>
+      <TabWrapper isPending={isPending}>
         <TabPanel key={tab} tab={tab} />
       </TabWrapper>
     </div>
@@ -53,6 +76,7 @@ function TabPanel({ tab }: { tab: Tab }) {
     default:
       render = null;
   }
+
   return (
     <div className={tw('tab-panel bg-white rounded-lg shadow overflow-hidden')}>
       <h2
@@ -139,7 +163,7 @@ function Comments() {
 }
 
 function Comment({ children }: { children: number }) {
-  performanceDelay(2);
+  performanceDelay(5);
 
   return (
     <li className={tw('py-2 px-4 hover:bg-gray-50')}>댓글 {children + 1}</li>
