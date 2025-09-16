@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UseFunctionRouteImport } from './routes/use-function'
 import { Route as TransitionRouteImport } from './routes/transition'
 import { Route as DeferredValueRouteImport } from './routes/deferred-value'
+import { Route as ActionRouteImport } from './routes/action'
 
 const UseFunctionRoute = UseFunctionRouteImport.update({
   id: '/use-function',
@@ -28,32 +29,46 @@ const DeferredValueRoute = DeferredValueRouteImport.update({
   path: '/deferred-value',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActionRoute = ActionRouteImport.update({
+  id: '/action',
+  path: '/action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/action': typeof ActionRoute
   '/deferred-value': typeof DeferredValueRoute
   '/transition': typeof TransitionRoute
   '/use-function': typeof UseFunctionRoute
 }
 export interface FileRoutesByTo {
+  '/action': typeof ActionRoute
   '/deferred-value': typeof DeferredValueRoute
   '/transition': typeof TransitionRoute
   '/use-function': typeof UseFunctionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/action': typeof ActionRoute
   '/deferred-value': typeof DeferredValueRoute
   '/transition': typeof TransitionRoute
   '/use-function': typeof UseFunctionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/deferred-value' | '/transition' | '/use-function'
+  fullPaths: '/action' | '/deferred-value' | '/transition' | '/use-function'
   fileRoutesByTo: FileRoutesByTo
-  to: '/deferred-value' | '/transition' | '/use-function'
-  id: '__root__' | '/deferred-value' | '/transition' | '/use-function'
+  to: '/action' | '/deferred-value' | '/transition' | '/use-function'
+  id:
+    | '__root__'
+    | '/action'
+    | '/deferred-value'
+    | '/transition'
+    | '/use-function'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  ActionRoute: typeof ActionRoute
   DeferredValueRoute: typeof DeferredValueRoute
   TransitionRoute: typeof TransitionRoute
   UseFunctionRoute: typeof UseFunctionRoute
@@ -82,10 +97,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeferredValueRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/action': {
+      id: '/action'
+      path: '/action'
+      fullPath: '/action'
+      preLoaderRoute: typeof ActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  ActionRoute: ActionRoute,
   DeferredValueRoute: DeferredValueRoute,
   TransitionRoute: TransitionRoute,
   UseFunctionRoute: UseFunctionRoute,

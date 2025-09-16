@@ -7,7 +7,7 @@ const navigation: { path: string; text: string }[] = [
   { path: '/deferred-value', text: '지연된 값' },
   { path: '/transition', text: '트랜지션' },
   { path: '/use-function', text: 'use 함수' },
-  // { path: '/action', text: '액션' },
+  { path: '/action', text: '액션' },
 ];
 
 function RootLayout() {
