@@ -1,17 +1,18 @@
-import { ReactNode, useEffect, useRef, useState } from 'react'
-import { performanceDelay, tw } from '@/utils'
+import { ReactNode, useState } from 'react';
+import { performanceDelay, tw } from '@/utils';
 
-type Tab = 'posts' | 'comments' | 'authors'
+type Tab = 'posts' | 'comments' | 'authors';
 
 export default function Tabs() {
-  const [tab, setTab] = useState<Tab>('posts')
+  const [tab, setTab] = useState<Tab>('posts');
 
   // [실습]
   // 탭 전환 시, 사용자 입력과 컴포넌트 렌더링을 분리해
   // 사용자 경험을 향상시켜 봅니다.
 
   function handleTabChange(nextTab: Tab) {
-    setTab(nextTab)
+    // 즉각적인 상태 업데이트 리액트에 요청
+    setTab(nextTab);
   }
 
   return (
@@ -29,34 +30,28 @@ export default function Tabs() {
       </div>
 
       <TabWrapper>
-        <TabPanel tab={tab} />
+        <TabPanel key={tab} tab={tab} />
       </TabWrapper>
     </div>
-  )
+  );
 }
 
 function TabPanel({ tab }: { tab: Tab }) {
-  const listRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    listRef.current?.scroll({ top: 0 })
-  }, [tab])
-
   // 탭에 따라 다른 콘텐츠 렌더링
-  let render
+  let render;
 
   switch (tab) {
     case 'posts':
-      render = <Posts />
-      break
+      render = <Posts />;
+      break;
     case 'comments':
-      render = <Comments />
-      break
+      render = <Comments />;
+      break;
     case 'authors':
-      render = <Authors />
-      break
+      render = <Authors />;
+      break;
     default:
-      render = null
+      render = null;
   }
   return (
     <div className={tw('tab-panel bg-white rounded-lg shadow overflow-hidden')}>
@@ -67,11 +62,9 @@ function TabPanel({ tab }: { tab: Tab }) {
       >
         {tab.charAt(0).toUpperCase() + tab.slice(1)}
       </h2>
-      <div ref={listRef} className={tw('max-h-96 overflow-y-auto')}>
-        {render}
-      </div>
+      <div className={tw('max-h-96 overflow-y-auto')}>{render}</div>
     </div>
-  )
+  );
 }
 
 function TabButton({
@@ -81,11 +74,11 @@ function TabButton({
   onClick,
   children,
 }: {
-  tab: Tab
-  currentTab: Tab
-  isPending?: boolean
-  onClick: (tab: Tab) => void
-  children: ReactNode
+  tab: Tab;
+  currentTab: Tab;
+  isPending?: boolean;
+  onClick: (tab: Tab) => void;
+  children: ReactNode;
 }) {
   return (
     <button
@@ -102,7 +95,7 @@ function TabButton({
     >
       {children}
     </button>
-  )
+  );
 }
 
 function Posts() {
@@ -116,7 +109,7 @@ function Posts() {
           </li>
         ))}
     </ul>
-  )
+  );
 }
 
 function Authors() {
@@ -130,7 +123,7 @@ function Authors() {
           </li>
         ))}
     </ul>
-  )
+  );
 }
 
 function Comments() {
@@ -142,23 +135,23 @@ function Comments() {
           <Comment key={i}>{i}</Comment>
         ))}
     </ul>
-  )
+  );
 }
 
 function Comment({ children }: { children: number }) {
-  performanceDelay(2)
+  performanceDelay(2);
 
   return (
     <li className={tw('py-2 px-4 hover:bg-gray-50')}>댓글 {children + 1}</li>
-  )
+  );
 }
 
 function TabWrapper({
   isPending,
   children,
 }: {
-  isPending?: boolean
-  children: ReactNode
+  isPending?: boolean;
+  children: ReactNode;
 }) {
   return (
     <div className={tw('relative')}>
@@ -173,7 +166,7 @@ function TabWrapper({
       )}
       {children}
     </div>
-  )
+  );
 }
 
 function Loading() {
@@ -206,5 +199,5 @@ function Loading() {
         로딩 중...
       </span>
     </div>
-  )
+  );
 }

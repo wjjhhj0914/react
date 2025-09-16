@@ -1,16 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
-import { performanceDelay, tw } from '@/utils'
+import { useEffect, useRef, useState, useTransition } from 'react';
+import { performanceDelay, tw } from '@/utils';
 
 export default function SlowListContainer() {
-  const moreCount = 1000
-  const [count, setCount] = useState(20)
+  const moreCount = 1000;
+  const [count, setCount] = useState(20);
 
   // [실습]
   // 트랜지션을 사용해 사용자 경험을 개선해봅니다.
+  const [isPending, startTransition] = useTransition();
 
   const handleClick = () => {
-    setCount((c) => c + moreCount)
-  }
+    startTransition(() => {
+      setCount(c => c + moreCount);
+    });
+  };
 
   return (
     <div>
@@ -20,30 +23,31 @@ export default function SlowListContainer() {
           'cursor-pointer',
           'my-2 px-3 py-1 rounded',
           'bg-black text-white',
-          'text-sm transition-transform'
+          'text-sm transition-transform',
+          isPending && 'opacity-50'
         )}
         onClick={handleClick}
       >
-        {moreCount}개 더 보기
+        {isPending ? '트랜지션 시작' : `${moreCount}개 더 보기`}
       </button>
       <SlowList count={count} />
     </div>
-  )
+  );
 }
 
 function SlowList({ count, className }: { count: number; className?: string }) {
-  const items = Array.from({ length: count }, (_, i) => `항목 ${i + 1}`)
-  const listRef = useRef<HTMLUListElement>(null)
+  const items = Array.from({ length: count }, (_, i) => `항목 ${i + 1}`);
+  const listRef = useRef<HTMLUListElement>(null);
 
-  performanceDelay(500)
+  performanceDelay(500);
 
   useEffect(() => {
-    const list = listRef.current
+    const list = listRef.current;
     if (list) {
-      const lastChild = [...list.children].at(-1) as HTMLLIElement
-      lastChild.scrollIntoView({ behavior: 'smooth' })
+      const lastChild = [...list.children].at(-1) as HTMLLIElement;
+      lastChild.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [count])
+  }, [count]);
 
   return (
     <ul
@@ -56,11 +60,11 @@ function SlowList({ count, className }: { count: number; className?: string }) {
         className
       )}
     >
-      {items.map((item) => (
+      {items.map(item => (
         <li key={item} className="text-slate-600">
           {item}
         </li>
       ))}
     </ul>
-  )
+  );
 }
