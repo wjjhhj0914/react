@@ -19,8 +19,8 @@ function Page() {
           </p>
         </div>
 
-        {/* <Pagination /> */}
-        {/* <SlowList /> */}
+        <Pagination />
+        <SlowList />
         <Tabs />
       </section>
     </>
