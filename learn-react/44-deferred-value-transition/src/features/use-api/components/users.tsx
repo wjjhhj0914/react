@@ -1,9 +1,16 @@
-import { useEffect, useState } from 'react'
-import { tw, wait } from '@/utils'
+import {
+  Suspense,
+  use,
+  useMemo,
+  // useEffect,
+  // useState
+} from 'react';
+import { ErrorBoundary } from '@/components';
+import { tw, wait } from '@/utils';
 
 interface User {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 export default function Users() {
@@ -11,32 +18,59 @@ export default function Users() {
   // use 함수는 Promise를 직접 받아 해결된 값을 반환합니다.
   // Suspense 경계 내에서만 사용할 수 있습니다.
 
-  const [loading, setLoading] = useState<boolean>(false)
-  const [data, setData] = useState<null | User[]>(null)
+  // const [loading, setLoading] = useState<boolean>(false)
+  // const [data, setData] = useState<null | User[]>(null)
 
-  useEffect(() => {
-    setLoading(true)
-    fetchUsers().then((data) => {
-      setData(data)
-      setLoading(false)
-    })
-  }, [])
+  // useEffect(() => {
+  //   setLoading(true)
+  //   fetchUsers().then((data) => {
+  //     setData(data)
+  //     setLoading(false)
+  //   })
+  // }, [])
+
+  const usersPromise = useMemo(() => fetchUsers(), []);
 
   return (
     <section className="mt-6 p-6 max-w-xl bg-gray-50 rounded-xl shadow-lg">
       <h3 className="text-xl font-bold mb-6 text-center text-indigo-700">
         사용자 목록
       </h3>
-      {loading && <Loading />}
-      {!loading && data && <UserList items={data} />}
+      {/* {loading && <Loading />} */}
+      {/* {!loading && data && <UserList items={data} />} */}
+
+      <ErrorBoundary>
+        <Suspense fallback={<Loading />}>
+          <UserList fetchUsersPromise={usersPromise} />
+        </Suspense>
+      </ErrorBoundary>
     </section>
-  )
+  );
 }
 
-function UserList({ items }: { items: User[] }) {
+function UserList({
+  fetchUsersPromise,
+}: {
+  fetchUsersPromise: Promise<User[]>;
+}) {
+  // use 함수는 Promise 인스턴스를 전달 받아
+  // 결과가 해결(resolved)된 값을 반환합니다.
+  // 오류가 발생한 경우, ErrorBoundary
+  // 컴포넌트에서 에러 처리합니다.
+
+  const items = use(fetchUsersPromise);
+  console.log(items);
+
+  // use 함수는 훅 함수가 아니므로,
+  // if문 또는 for문 내부에서 사용이 가능!
+  // let items: User[] = []
+  // if (fetchUsersPromise) {
+  //   items = use(fetchUsersPromise)
+  // }
+
   return (
     <ul className="space-y-2">
-      {items.map((user) => (
+      {items.map(user => (
         <li
           key={user.id}
           className={tw(
@@ -56,7 +90,7 @@ function UserList({ items }: { items: User[] }) {
         </li>
       ))}
     </ul>
-  )
+  );
 }
 
 function Loading() {
@@ -67,11 +101,13 @@ function Loading() {
         사용자 데이터를 불러오는 중...
       </p>
     </div>
-  )
+  );
 }
 
 async function fetchUsers(): Promise<User[]> {
-  await wait(1.2)
+  await wait(1.2);
+
+  throw new Error('데이터 가져오기에 실패했습니다.');
 
   return [
     { id: '1', name: '김민준' },
@@ -84,5 +120,5 @@ async function fetchUsers(): Promise<User[]> {
     { id: '8', name: '임지민' },
     { id: '9', name: '한소율' },
     { id: '10', name: '오태현' },
-  ]
+  ];
 }
