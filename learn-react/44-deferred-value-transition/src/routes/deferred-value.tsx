@@ -1,9 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { SearchForm } from '@/features/deferred-value'
+import { createFileRoute } from '@tanstack/react-router';
+import { useDeferredValue, useState } from 'react';
+import { SearchForm, SlowChild } from '@/features/deferred-value';
 
 function Page() {
-  const [query, setQuery] = useState<string>('')
+  const [query, setQuery] = useState<string>('');
+  const deferredQuery = useDeferredValue(query, '');
+  console.table({ query, deferredQuery });
 
   return (
     <>
@@ -27,16 +29,16 @@ function Page() {
         <SearchForm query={query} setQuery={setQuery} />
 
         <div className="flex flex-col space-y-5">
-          {/* <SlowChild query={query} /> */}
+          <SlowChild query={deferredQuery} />
           {/* <FilterList query={query} /> */}
           {/* 지연된 값과 Suspense를 결합해 이전 값을 표시 */}
           {/* <SlowList query={query} /> */}
         </div>
       </section>
     </>
-  )
+  );
 }
 
 export const Route = createFileRoute('/deferred-value')({
   component: Page,
-})
+});

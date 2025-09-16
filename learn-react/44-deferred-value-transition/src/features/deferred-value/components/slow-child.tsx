@@ -1,5 +1,5 @@
-import { type ComponentProps } from 'react'
-import { performanceDelay, tw } from '@/utils'
+import { type ComponentProps, memo } from 'react';
+import { performanceDelay, tw } from '@/utils';
 
 // [실습]
 // 사용자 입력이 즉각 반응하지 않아 UI가 버벅이는 것처럼 느껴집니다.
@@ -11,7 +11,7 @@ function SlowChild({
   ...restProps
 }: ComponentProps<'p'> & { query: string }) {
   // 성능 지연(0.1s) 시뮬레이션
-  performanceDelay(100)
+  performanceDelay(100);
 
   return (
     <p
@@ -26,7 +26,12 @@ function SlowChild({
       <b className="text-base">검색어</b>
       <span className="text-sm">{query}</span>
     </p>
-  )
+  );
 }
 
-export default SlowChild
+// 이전에 전달된 props와 현재 전달된 props 비교
+// 비교한 결과 변화가 없다면 렌더링 안함
+// 다만, 얕은 비교를 수행하므로
+// props가 깊은 비교를 요하는 객체 또는
+// 배열인 경우, 고급 비교가 필요
+export default memo(SlowChild);
