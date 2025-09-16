@@ -55,8 +55,10 @@ function Page() {
               <h2>지연값 사용 안함 / 메모 안됨</h2>
               <Suspense fallback={<SlowListPlaceholder />}>
                 {isPending || <SlowList query={query1} />}
+                {/* <SlowList query={query1} /> */}
               </Suspense>
             </div>
+
             <div className="space-y-2">
               <SearchForm query={query2} setQuery={setQuery2} />
               <h2>지연값 사용 / 메모됨 {isPending ? '(지연 처리 중)' : ''}</h2>
