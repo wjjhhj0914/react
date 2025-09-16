@@ -50,7 +50,14 @@ export default function Users() {
   // }, [])
 
   // [안전] Promise 인스턴스를 기억하고 있으므로 렌더링과 상관없이 동일한 참조를 하위 컴포넌트에 전달
-  const usersPromise = useMemo(() => fetchUsers(), []);
+  const usersPromise = useMemo(
+    () =>
+      fetchUsers().catch(error => {
+        // 오류 처리
+        setError(error);
+      }),
+    []
+  );
 
   // [위험] 컴포넌트가 리렌더링 되면 무한 반복에 빠질 수 있다.
   const [message, setMessage] = useState<string>('');
@@ -64,6 +71,25 @@ export default function Users() {
 
   // const usersPromise = fetchUsers() // ... Promise 2
 
+  // 오류 처리 [2]
+  // Promise 거절될 경우,
+  // catch() 메서드를 사용해 컴포넌트 내부에서 오류 처리
+  const [error, setError] = useState<null | Error>(null);
+
+  if (error) {
+    return (
+      <div
+        role="alert"
+        className={tw`
+          text-red-600 bg-red-50 rounded
+          p-2 border-2 border-red-700
+        `}
+      >
+        {error.message}
+      </div>
+    );
+  }
+
   return (
     <section className="mt-6 p-6 max-w-xl bg-gray-50 rounded-xl shadow-lg">
       <h3 className="text-xl font-bold mb-6 text-center text-indigo-700">
@@ -73,6 +99,7 @@ export default function Users() {
       {/* {loading && <Loading />} */}
       {/* {!loading && data && <UserList items={data} />} */}
 
+      {/* 오류 처리 [1] */}
       <ErrorBoundary>
         <Suspense fallback={<Loading />}>
           <UserList fetchUsersPromise={usersPromise} />
@@ -86,7 +113,7 @@ export default function Users() {
 function UserList({
   fetchUsersPromise,
 }: {
-  fetchUsersPromise: Promise<User[]>;
+  fetchUsersPromise: Promise<User[] | void>;
 }) {
   // use 함수는 Promise 인스턴스를 전달 받아
   // 결과가 해결(resolved)된 값을 반환합니다.
@@ -109,7 +136,7 @@ function UserList({
 
   return (
     <ul className="space-y-2">
-      {items.map(user => (
+      {items?.map(user => (
         <li
           key={user.id}
           className={tw(
@@ -147,7 +174,7 @@ async function fetchUsers(): Promise<User[]> {
   await wait(1.2);
 
   // 오류 상황 체크
-  // throw new Error('데이터 가져오기에 실패했습니다.')
+  throw new Error('데이터 가져오기에 실패했습니다.');
 
   console.log('fetchUsers');
 
