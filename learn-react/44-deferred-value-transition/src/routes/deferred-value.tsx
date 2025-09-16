@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useDeferredValue, useState } from 'react';
 import { FilterList, SearchForm, SlowChild } from '@/features/deferred-value';
+import { tw } from '@/utils';
 
 function Page() {
   // 즉각 반응하는 상태
@@ -33,7 +34,10 @@ function Page() {
 
         <div className="flex flex-col space-y-5">
           <SlowChild query={deferredQuery} isPending={isPending} />
-          {/* <FilterList query={query} /> */}
+          <FilterList
+            query={deferredQuery}
+            className={tw({ 'bg-slate-100 text-slate-600': isPending })}
+          />
           {/* 지연된 값과 Suspense를 결합해 이전 값을 표시 */}
           {/* <SlowList query={query} /> */}
         </div>
