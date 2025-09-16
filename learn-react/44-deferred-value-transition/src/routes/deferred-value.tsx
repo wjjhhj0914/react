@@ -1,15 +1,24 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useDeferredValue, useState } from 'react';
-import { FilterList, SearchForm, SlowChild } from '@/features/deferred-value';
-import { tw } from '@/utils';
+import { Suspense, useDeferredValue, useState } from 'react';
+import {
+  FilterList,
+  MemoizedSlowList,
+  SearchForm,
+  SlowChild,
+  SlowList,
+  SlowListPlaceholder,
+} from '@/features/deferred-value';
+
+// import { tw } from '@/utils'
 
 function Page() {
   // 즉각 반응하는 상태
-  const [query, setQuery] = useState<string>('');
+  const [query1, setQuery1] = useState<string>('');
+  const [query2, setQuery2] = useState<string>('');
   // 지연된 값 (즉각 반응하는 상태에 의존)
-  const deferredQuery = useDeferredValue(query, '');
+  const deferredQuery2 = useDeferredValue(query2, '');
   // 파생된 상태
-  const isPending = query !== deferredQuery;
+  const isPending = query2 !== deferredQuery2;
 
   return (
     <>
@@ -30,16 +39,32 @@ function Page() {
           </p>
         </div>
 
-        <SearchForm query={query} setQuery={setQuery} />
+        {/* <SearchForm query={query} setQuery={setQuery} /> */}
 
         <div className="flex flex-col space-y-5">
-          <SlowChild query={deferredQuery} isPending={isPending} />
-          <FilterList
+          {/* <SlowChild query={deferredQuery} isPending={isPending} /> */}
+          {/* <FilterList
             query={deferredQuery}
             className={tw({ 'bg-slate-100 text-slate-600': isPending })}
-          />
+          /> */}
+
           {/* 지연된 값과 Suspense를 결합해 이전 값을 표시 */}
-          {/* <SlowList query={query} /> */}
+          <div className="flex gap-x-8">
+            <div className="space-y-2">
+              <SearchForm query={query1} setQuery={setQuery1} />
+              <h2>지연값 사용 안함 / 메모 안됨</h2>
+              <Suspense fallback={<SlowListPlaceholder />}>
+                {isPending || <SlowList query={query1} />}
+              </Suspense>
+            </div>
+            <div className="space-y-2">
+              <SearchForm query={query2} setQuery={setQuery2} />
+              <h2>지연값 사용 / 메모됨 {isPending ? '(지연 처리 중)' : ''}</h2>
+              <Suspense fallback={<SlowListPlaceholder />}>
+                <MemoizedSlowList query={deferredQuery2} />
+              </Suspense>
+            </div>
+          </div>
         </div>
       </section>
     </>
