@@ -1,4 +1,4 @@
-import { type FormEvent, useId, useRef, useState } from 'react';
+import { type FormEvent, useId, useState, useTransition } from 'react';
 import { tw, wait } from '@/utils';
 
 // [이전 방식]
@@ -7,38 +7,31 @@ import { tw, wait } from '@/utils';
 // 직접 loading, error, data 상태 관리 필요
 // 코드가 복잡하고 실수 여지도 많음
 
+// [실습]
+// 리액트 19에서 도입된 액션(Action)을 사용해 새로운 비동기 작업 처리
+// - 폼의 action 속성에 액션 함수 설정
+// - 트랜지션을 사용해 로딩 상태와 트랜지션 시작 설정
+// - 액션을 트랜지션과 함께 사용하면
+//   비동기 작업이 진행되는 동안 부드럽게 UI 작동
+
 export default function UsingAction() {
   const id = useId();
-  const [isPending, setIsPending] = useState<boolean>(false);
-  const [data, setData] = useState<string>('1');
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const [data, setData] = useState<string>('10');
+  const [isPending, startTransition] = useTransition();
 
-    const input = inputRef.current;
-    if (!input) return;
+  const actionFunc = async (formData: FormData) => {
+    const age = formData.get('age');
 
-    setIsPending(true);
-
-    if (input.value !== '') {
+    startTransition(async () => {
       await wait(1);
-      setData(input.value);
-    }
-
-    setIsPending(false);
+      if (typeof age === 'string') setData(age);
+    });
   };
-
-  // [실습]
-  // 리액트 19에서 도입된 액션(Action)을 사용해 새로운 비동기 작업 처리
-  // - 폼의 action 속성에 액션 함수 설정
-  // - 트랜지션을 사용해 로딩 상태와 트랜지션 시작 설정
-  // - 액션을 트랜지션과 함께 사용하면
-  //   비동기 작업이 진행되는 동안 부드럽게 UI 작동
 
   return (
     <form
-      onSubmit={handleSubmit}
+      // action={actionFunc}
       className={tw(
         'max-w-xs mx-auto mt-10 p-6 bg-white rounded-lg shadow space-y-4'
       )}
@@ -47,7 +40,6 @@ export default function UsingAction() {
         나이 변경
       </label>
       <input
-        ref={inputRef}
         type="number"
         name="age"
         id={id}
@@ -56,11 +48,12 @@ export default function UsingAction() {
           'border border-gray-300 rounded',
           'focus:outline-none focus:ring-2 focus:ring-indigo-500'
         )}
-        defaultValue={1}
+        defaultValue={data}
         min={1}
       />
       <button
         type="submit"
+        formAction={actionFunc}
         disabled={isPending}
         className={tw(
           'w-full py-2 px-4 rounded font-bold transition',
