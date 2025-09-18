@@ -1,8 +1,125 @@
-import { useOptimistic, useState, useTransition } from 'react';
+import {
+  useActionState,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
 import { toast } from 'sonner';
 import { tw, wait } from '@/utils';
 
+interface Message {
+  id: string;
+  text: string;
+  optimistic?: boolean;
+}
+
+const initMessages: Message[] = [
+  {
+    id: crypto.randomUUID(),
+    text: '낙관적인 UI 업데이트',
+  },
+  {
+    id: crypto.randomUUID(),
+    text: '낙관적인 결과를 미리 화면에 표시하기',
+  },
+  {
+    id: crypto.randomUUID(),
+    text: '낙관적인 결과와 달리, 응답이 실패하면?',
+  },
+];
+
 export default function OptimisticUI() {
+  // [실습]
+  // - 폼 상태 관리를 useActionState 훅으로 변경하기
+  // - useActionState(action, initialState)
+
+  const [messages, formAction, isPending] = useActionState<Message[], FormData>(
+    async (prevMessages, formData) => {
+      const text = formData.get('message') as string;
+
+      if (text.trim().length === 0) {
+        toast.warning('메시지를 입력하세요!');
+        messageRef.current?.focus();
+        return prevMessages;
+      }
+
+      const newMessage: Message = {
+        id: crypto.randomUUID(),
+        text,
+      };
+
+      // 낙관적 업데이트
+      updateOptimisticMessages([
+        ...optimisticMessages,
+        { ...newMessage, optimistic: true },
+      ]);
+
+      // 서버의 요청 처리 지연 시뮬레이션
+      await wait(1.5);
+
+      // 서버의 응답 데이터로 실제 데이터 업데이트
+      return [...prevMessages, newMessage];
+    },
+    initMessages
+  );
+
+  const [optimisticMessages, updateOptimisticMessages] =
+    useOptimistic<Message[]>(messages);
+
+  const messageRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className={tw`flex items-center justify-center mt-2`}>
+      <div className={tw`w-full max-w-md p-6 bg-white rounded-lg shadow`}>
+        <form
+          noValidate
+          action={formAction}
+          className={tw`flex gap-2 items-center`}
+        >
+          <input
+            type="text"
+            name="message"
+            ref={messageRef}
+            className={tw`
+              flex-1 px-3 py-2
+              border border-gray-300 rounded
+              focus:outline-none focus:ring-2 focus:ring-indigo-500
+            `}
+            placeholder="메시지 입력"
+            required
+          />
+          <button
+            type="submit"
+            className={tw`
+              cursor-pointer
+              px-4 py-2 bg-indigo-600 text-white font-bold rounded
+              hover:bg-indigo-700 transition
+              disabled:cursor-not-allowed disabled:opacity-50
+              ${isPending && 'opacity-50 cursor-not-allowed'}
+            `}
+          >
+            {isPending ? '추가 중...' : '추가'}
+          </button>
+        </form>
+        <div className={tw`mt-4 mb-0 space-y-2`}>
+          {optimisticMessages.map(message => (
+            <div
+              key={message.id}
+              className={tw`
+                px-3 py-2 rounded bg-blue-50 text-indigo-800 font-mono
+              `}
+            >
+              {message.text} {message.optimistic && '(응답 대기중...)'}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OptimisticUI_v1() {
   // 사용자에게 보여질 UI 상태 (서버의 응답 결과를 상태에 동기화)
   const [messages, setMessages] = useState<string[]>(['낙관적인 UI 업데이트']);
 
