@@ -8,6 +8,27 @@
  * // 1.5초 동안 대기
  * await wait(1.5)
  */
-export default function wait(delay = 1) {
-  return new Promise((resolve) => setTimeout(resolve, delay * 1000))
+export default function wait(
+  delay = 1,
+  {
+    forceRejected,
+    resolveMessage = '요청이 성공했습니다.',
+    rejectMessage = '요청이 실패했습니다.',
+  }: WaitOptions = {}
+) {
+  return new Promise((resolve, reject) =>
+    setTimeout(() => {
+      if (forceRejected) {
+        reject(rejectMessage);
+      } else {
+        resolve(resolveMessage);
+      }
+    }, delay * 1000)
+  );
+}
+
+interface WaitOptions {
+  forceRejected?: boolean;
+  resolveMessage?: string;
+  rejectMessage?: string;
 }
