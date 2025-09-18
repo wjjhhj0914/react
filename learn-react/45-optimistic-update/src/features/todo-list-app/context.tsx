@@ -6,6 +6,7 @@ import {
   useMemo,
   useOptimistic,
 } from 'react';
+import { toast } from 'sonner';
 import { useImmerReducer } from 'use-immer';
 import { useAuth } from '@/contexts/auth';
 import type { Todo } from '@/libs/supabase';
@@ -111,11 +112,12 @@ export default function TodoListProvider({
 
         try {
           // 서버 비동기 요청 지연 처리를 위한 유틸리티 함수
-          await wait(1.2, { forceRejected: false });
+          await wait(3, { forceRejected: false });
           // 실제 Supabase 데이터베이스 todos 테이블에 요청
           const createdTodo = await createTodo({ doit: newTodo.doit });
           // 성공: 응답받은 실제 서버 데이터로 상태를 업데이트
           dispatch(addTodoAction(createdTodo));
+          toast.success('할 일 추가에 성공했습니다!');
         } catch {
           // 실패: 낙관적으로 변경한 상태를 롤백(rollback)
           updateOptimisticTodos(optimisticRollbackAction());
@@ -132,7 +134,10 @@ export default function TodoListProvider({
           await deleteTodo(removeId);
           // 성공: 응답받은 실제 서버 데이터로 상태를 업데이트
           dispatch(removeTodoAction(removeId));
-        } catch {
+        } catch (error) {
+          toast.error(
+            `${(error as Error)?.message ?? '알 수 없는 이유'}로 인해 할 일 삭제에 실패했습니다. 😅`
+          );
           // 실패: 낙관적으로 변경한 상태를 롤백(rollback)
           updateOptimisticTodos(optimisticRollbackAction());
         }
@@ -143,7 +148,7 @@ export default function TodoListProvider({
 
         try {
           // 서버 비동기 요청 지연 처리를 위한 유틸리티 함수
-          await wait(1.2, { forceRejected: true });
+          await wait(1.2, { forceRejected: false });
           // 실제 Supabase 데이터베이스 todos 테이블에 요청
           const updatedTodo = await updateTodo(editTodo);
           // 성공: 응답받은 실제 서버 데이터로 상태를 업데이트

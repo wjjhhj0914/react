@@ -116,7 +116,7 @@ function EditMode({
         // 서버에 요청/응답
         // 실제 서버의 상태 관리
         const updateTodo = { ...todo, doit: input.value };
-        editTodo(updateTodo);
+        await editTodo(updateTodo);
 
         // 편집 모드 종료 (일반 모드로 변경)
         onEditModeOff();
