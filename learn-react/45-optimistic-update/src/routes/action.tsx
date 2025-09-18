@@ -1,11 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
 import {
   OptimisticUI,
   TodoListOptimistic,
   UsingAction,
   UsingActionState,
-} from '@/features/action-state'
-import { tw } from '@/utils'
+} from '@/features/action-state';
+import { tw } from '@/utils';
 
 function Page() {
   return (
@@ -25,14 +25,14 @@ function Page() {
           </p>
         </div>
         <div
-          className={tw` 
+          className={tw`
             flex flex-col
             lg:flex-row flex-wrap
             gap-x-8 items-start
             mt-5
           `}
         >
-          <article hidden className="my-5 w-full lg:max-w-3/4">
+          <article className="my-5 w-full lg:max-w-3/4">
             <h3 className="text-2xl text-indigo-600 flex items-center gap-x-1">
               TodoList +{' '}
               <code className="bg-indigo-100 pt-0 pb-0.5 px-2 rounded text-xl">
@@ -44,7 +44,7 @@ function Page() {
           </article>
 
           <div className="flex flex-col space-y-5">
-            <article className="my-5">
+            <article hidden className="my-5">
               <h3 className="text-2xl text-indigo-600 flex items-center gap-x-1">
                 <code className="bg-indigo-100 pt-0 pb-0.5 px-2 rounded text-xl">
                   useOptimistic
@@ -76,9 +76,9 @@ function Page() {
         </div>
       </section>
     </>
-  )
+  );
 }
 
 export const Route = createFileRoute('/action')({
   component: Page,
-})
+});

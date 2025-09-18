@@ -6,60 +6,50 @@ import {
   useEffect,
   useRef,
   useState,
-} from 'react'
-import type { Todo } from '@/libs/supabase'
-import { deleteTodo, updateTodo } from '@/libs/supabase/api/todos'
-import { tw } from '@/utils'
-import { useTodoListDispatch } from '../../context'
-import S from './style.module.css'
+  useTransition,
+} from 'react';
+import type { Todo } from '@/libs/supabase';
+import { tw } from '@/utils';
+import { useTodoListDispatch } from '../../context';
+import S from './style.module.css';
 
 function TodoItem({ todo }: { todo: Todo }) {
-  const { removeTodo, editTodo } = useTodoListDispatch()
+  const { removeTodo, editTodo } = useTodoListDispatch();
+  const [isPending, startTransition] = useTransition();
 
-  // 할 일 삭제 기능 (비동기 함수로 변경)
-  const handleRemove = async () => {
-    // 비동기 처리
-    const deletedTodo = await deleteTodo(todo.id)
+  // 할 일 삭제 기능
+  const handleRemove = () => {
+    startTransition(async () => {
+      await removeTodo(todo.id);
+    });
+  };
 
-    // 동기 처리
-    removeTodo(deletedTodo.id)
-  }
+  // 할 일 완료 여부 토글 기능
+  const handleToggle = (e: ChangeEvent<HTMLInputElement>) => {
+    startTransition(async () => {
+      const updateTodo = { ...todo, done: e.target.checked };
+      await editTodo(updateTodo);
+    });
+  };
 
-  // 할 일 완료 여부 토글 기능 (비동기 함수로 변경)
-  const handleToggle = async (e: ChangeEvent<HTMLInputElement>) => {
-    // 비동기 처리 (Superbase 단에서 처리)
-    const updatedTodo = await updateTodo({
-      id: todo.id,
-      done: e.target.checked,
-    })
+  const inputRef = useRef<HTMLInputElement>(null);
 
-    // 동기 처리 (UI 단에서 처리)
-    editTodo(updatedTodo)
-  }
-
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(false);
 
   const handleEditModeOn = () => {
-    setEditMode(true)
+    setEditMode(true);
     setTimeout(() => {
-      const input = inputRef.current
-      if (input) input.select()
-    }, 0)
-  }
+      const input = inputRef.current;
+      if (input) input.select();
+    }, 0);
+  };
 
-  const handleEditModeOff = useCallback(() => setEditMode(false), [])
+  const handleEditModeOff = useCallback(() => setEditMode(false), []);
 
   if (editMode) {
     return (
-      <EditMode
-        ref={inputRef}
-        todo={todo}
-        onEdit={editTodo}
-        onEditModeOff={handleEditModeOff}
-      />
-    )
+      <EditMode ref={inputRef} todo={todo} onEditModeOff={handleEditModeOff} />
+    );
   }
 
   return (
@@ -86,7 +76,7 @@ function TodoItem({ todo }: { todo: Todo }) {
         onClick={handleEditModeOn}
         data-button-edit
       >
-        수정
+        {isPending ? '수정 중...' : '수정'}
       </button>
       <button
         className="button"
@@ -97,55 +87,58 @@ function TodoItem({ todo }: { todo: Todo }) {
         삭제
       </button>
     </li>
-  )
+  );
 }
 
-export default memo(TodoItem)
+export default memo(TodoItem);
+
+// --------------------------------------------------------------------------
 
 function EditMode({
   ref,
   todo,
-  onEdit,
   onEditModeOff,
 }: {
-  ref: RefObject<HTMLInputElement | null>
-  todo: Todo
-  onEdit: (editTodo: Todo) => void
-  onEditModeOff: () => void
+  ref: RefObject<HTMLInputElement | null>;
+  todo: Todo;
+  onEditModeOff: () => void;
 }) {
-  // 비동기 함수로 변경
-  const handleEdit = useCallback(async () => {
-    const input = ref.current
+  const { editTodo } = useTodoListDispatch();
+  const [isPending, startTransition] = useTransition();
+
+  const handleEdit = useCallback(() => {
+    const input = ref.current;
 
     if (input) {
-      // 비동기 요청
-      // Supabase 데이터베이스인 Todos 테이블의 행 데이터 업데이트
-      const updatedTodo = await updateTodo({ id: todo.id, doit: input.value })
+      // 트랜지션으로 관리
+      startTransition(async () => {
+        // 옵티미스틱 업데이트
+        // 서버에 요청/응답
+        // 실제 서버의 상태 관리
+        const updateTodo = { ...todo, doit: input.value };
+        editTodo(updateTodo);
 
-      // 동기 요청
-      // TodoList 컨텍스트 상태 업데이트
-      onEdit(updatedTodo)
-
-      // 편집 모드 종료 (일반 모드로 변경)
-      onEditModeOff()
+        // 편집 모드 종료 (일반 모드로 변경)
+        onEditModeOff();
+      });
     }
-  }, [onEdit, onEditModeOff, todo, ref])
+  }, [ref, todo, editTodo, onEditModeOff]);
 
   useEffect(() => {
-    const input = ref.current
-    if (!input) return
+    const input = ref.current;
+    if (!input) return;
 
     const handleActions = ({ key }: globalThis.KeyboardEvent) => {
-      if (key === 'Enter') handleEdit()
-      if (key === 'Escape') onEditModeOff()
-    }
+      if (key === 'Enter') handleEdit();
+      if (key === 'Escape') onEditModeOff();
+    };
 
-    input.addEventListener('keydown', handleActions)
+    input.addEventListener('keydown', handleActions);
 
     return () => {
-      input.removeEventListener('keydown', handleActions)
-    }
-  }, [handleEdit, onEditModeOff, ref])
+      input.removeEventListener('keydown', handleActions);
+    };
+  }, [handleEdit, onEditModeOff, ref]);
 
   return (
     <li className={S.listItem} data-list-item-edit-mode>
@@ -154,12 +147,16 @@ function EditMode({
       </div>
       <button
         type="button"
-        className="button"
         onClick={handleEdit}
+        disabled={isPending}
+        className={tw(
+          'button',
+          'disabled:opacity-50 disabled:cursor-not-allowed'
+        )}
         data-button-save
       >
-        저장
+        {isPending ? '저장 중...' : '저장'}
       </button>
     </li>
-  )
+  );
 }

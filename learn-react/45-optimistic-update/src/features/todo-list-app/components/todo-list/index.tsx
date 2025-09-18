@@ -1,28 +1,28 @@
-import { useTodoList } from '../../context'
-import TodoItem from '../todo-item'
-import S from './style.module.css'
+import { useTodoList } from '../../context';
+import TodoItem from '../todo-item';
+import S from './style.module.css';
 
 export default function TodoList() {
-  const { todos, search, hiddenDoneTodos } = useTodoList()
+  const { optimisticTodos, search, hiddenDoneTodos } = useTodoList();
 
-  let filteredTodos = todos
+  let filteredTodos = optimisticTodos;
 
   if (search.trim() !== '') {
-    filteredTodos = todos.filter((todo) => todo.doit.includes(search))
+    filteredTodos = optimisticTodos.filter(todo => todo.doit.includes(search));
   }
 
   if (hiddenDoneTodos) {
-    filteredTodos = filteredTodos.filter((todo) => !todo.done)
+    filteredTodos = filteredTodos.filter(todo => !todo.done);
   }
 
   return (
     <section>
       <h2 className="sr-only">할 일 목록</h2>
       <ul className={S.todoList}>
-        {filteredTodos.map((todo) => (
+        {filteredTodos.map(todo => (
           <TodoItem key={todo.id} todo={todo} />
         ))}
       </ul>
     </section>
-  )
+  );
 }
