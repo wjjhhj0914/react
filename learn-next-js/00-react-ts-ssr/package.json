@@ -9,7 +9,7 @@
     "prod": "bun run prod:csr && bun run prod:ssr",
     "prod:csr": "bunx --bun vite build --outDir dist/client",
     "prod:ssr": "bunx --bun vite build --ssr src/entry-server.tsx --outDir dist/server",
-    "preview:csr": "vite preview ./dist/client --port 3001",
+    "preview:csr": "bunx serve ./dist/client -p 3001",
     "preview:ssr": "cross-env NODE_ENV=production PORT=3002 bun server",
     "clean": "rimraf -rf dist"
   },
