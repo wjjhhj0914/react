@@ -6,6 +6,7 @@ import {
   useMemo,
   useOptimistic,
 } from 'react';
+import { toast } from 'sonner';
 import { useImmerReducer } from 'use-immer';
 import { useAuth } from '@/contexts/auth';
 import { type Todo } from '@/libs/supabase';
@@ -68,6 +69,7 @@ export default function TodoListProvider({
 
   // --------------------------------------------------------------------------
   // 낙관적인 업데이트 상태
+
   const [optimisticTodos, updateOptimisticTodos] = useOptimistic(
     state.todos,
     (todos: State['todos'], action: Action) => {
@@ -94,39 +96,60 @@ export default function TodoListProvider({
 
   // --------------------------------------------------------------------------
   // 액션 함수
+
   const actions = useMemo(
     () => ({
       addTodo: async (newTodo: Todo) => {
-        updateOptimisticTodos(addTodoAction(newTodo));
+        // 낙관적 업데이트를 UI와 서버 상태 모두에 적용
+        updateOptimisticTodos(addTodoAction(newTodo)); // 가짜 데이터로 낙관적인 상태에 추가
+        dispatch(addTodoAction(newTodo)); // 가짜 데이터 추가
+
         try {
-          await wait(1.2, { forceResolved: false });
-          const createdTodo = await createTodo({ doit: newTodo.doit });
-          dispatch(addTodoAction(createdTodo));
+          await wait(1.2, { forceResolved: true });
+          const createdTodo = await createTodo({ doit: newTodo.doit }); // 실제 서버 데이터
+          dispatch(removeTodoAction(newTodo.id)); // 가짜 데이터 제거
+          dispatch(addTodoAction(createdTodo)); // 실제 데이터로 교체
         } catch {
           updateOptimisticTodos(optimisticRollbackAction());
+          dispatch(removeTodoAction(newTodo.id));
+          toast.error('할 일 생성에 실패했습니다.');
         }
       },
       removeTodo: async (removeId: Todo['id']) => {
         const action = removeTodoAction(removeId);
+
+        // 롤백 시, 복구할 todo
+        const restoreTodo = optimisticTodos.find(todo => todo.id === removeId);
+
+        // 낙관적 업데이트를 UI와 서버 상태 모두에 적용
         updateOptimisticTodos(action);
+        dispatch(action);
+
         try {
           await wait();
           await deleteTodo(removeId);
-          dispatch(removeTodoAction(removeId));
         } catch {
           updateOptimisticTodos(optimisticRollbackAction());
+          if (restoreTodo) dispatch(addTodoAction(restoreTodo));
         }
       },
       editTodo: async (editTodo: Todo) => {
+        // 롤백 시, 복구할 todo
+        const restoreTodo = optimisticTodos.find(
+          todo => todo.id === editTodo.id
+        );
+
         updateOptimisticTodos(editTodoAction(editTodo));
+        dispatch(editTodoAction(editTodo));
         try {
           await wait();
-          const updatedTodo = await updateTodo(editTodo);
-          dispatch(editTodoAction(updatedTodo));
+          await updateTodo(editTodo);
         } catch {
           updateOptimisticTodos(optimisticRollbackAction());
+          if (restoreTodo) dispatch(editTodoAction(restoreTodo));
         }
       },
+
       searchTodos: (search: State['search']) => {
         dispatch(searchTodosAction(search));
       },
@@ -134,27 +157,47 @@ export default function TodoListProvider({
         dispatch(toggleDoneAction());
       },
     }),
-    [dispatch, updateOptimisticTodos]
+    [dispatch, optimisticTodos, updateOptimisticTodos]
   );
 
   // --------------------------------------------------------------------------
   // 리얼타임 데이터베이스 변경 감지 이펙트
+
+  // 서버 (슈퍼베이스 데이터베이스) <- -> 클라이언트 (리액트 앱)
+  // 변경 ------------------------> 적용
+  // 적용 <------------------------ 추가 (1)
+  // 변경 ------------------------> 추가 재적용 (2)
+
   useEffect(() => {
     // 구독 해제 함수 <- public.todos 테이블 변경 감지 구독
     const unsubscribe = realtimeTodos(payload => {
-      const { eventType, new: _newData } = payload;
+      const { eventType, new: newData, old: oldData } = payload;
 
       switch (eventType) {
         case 'INSERT': {
-          console.log('추가');
-          break;
-        }
-        case 'UPDATE': {
-          console.log('수정');
+          const createdTodo = newData as unknown as Todo;
+
+          const isExistTodo = state.todos.some(todo => {
+            if ('id' in createTodo) return todo.id === createTodo.id;
+            return false;
+          });
+
+          if (!isExistTodo) {
+            console.log('이미 존재하는 Todo입니다.', createdTodo.id);
+            return;
+          }
+
+          dispatch(addTodoAction(createdTodo));
           break;
         }
         case 'DELETE': {
-          console.log('삭제');
+          const removedTodo = oldData as unknown as Todo;
+          dispatch(removeTodoAction(removedTodo.id));
+          break;
+        }
+        case 'UPDATE': {
+          const updatedTodo = newData as unknown as Todo;
+          dispatch(editTodoAction(updatedTodo));
           break;
         }
       }
@@ -165,7 +208,7 @@ export default function TodoListProvider({
       // 구독 중인 데이터베이스 테이블을 구독 해제
       unsubscribe();
     };
-  }, []);
+  }, [dispatch, state.todos]);
 
   // --------------------------------------------------------------------------
   // 인증(Auth)

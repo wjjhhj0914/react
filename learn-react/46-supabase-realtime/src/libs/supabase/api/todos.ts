@@ -7,11 +7,11 @@ import supabase, { type Todo, type TodoInsert, TodoUpdate } from '../index';
 import requiredUser from './required-user';
 
 // --------------------------------------------------------------------------
-// 리억타임(Realtime)
+// 리얼타임(Realtime)
 
-export const realtimeTodos = (
+export const realtimeTodos = <T>(
   callback: (
-    payload: RealtimePostgresChangesPayload<{ [key: string]: unknown }>
+    payload: RealtimePostgresChangesPayload<{ [key: string]: T }>
   ) => void
 ) => {
   // 리얼타임 데이터베이스의 테이블을 구독(서브스크립션)
@@ -24,9 +24,9 @@ export const realtimeTodos = (
       'postgres_changes',
       { event: '*', schema: 'public', table: 'todos' },
       payload => {
-        // console.log('실시간 데이터베이스 변경 이벤트', payload.eventType)
-        // console.log('변경된 새로운 데이터', payload.new)
-        // console.log('변경 이전 데이터', payload.old)
+        console.log('실시간 데이터베이스 변경 이벤트', payload.eventType);
+        console.log('변경된 새로운 데이터', payload.new);
+        console.log('변경 이전 데이터', payload.old);
         callback(payload);
       }
     )
