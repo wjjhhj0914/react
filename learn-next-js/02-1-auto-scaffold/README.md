@@ -1,4 +1,21 @@
-# 기본 템플릿으로 Next.js 프로젝트 구성
+# bun-react-template
 
-- Create Next App 도구 사용
-- 기본 템플릿으로 프로젝트 스캐폴딩
+To install dependencies:
+
+```bash
+bun install
+```
+
+To start a development server:
+
+```bash
+bun dev
+```
+
+To run for production:
+
+```bash
+bun start
+```
+
+This project was created using `bun init` in bun v1.2.20. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
