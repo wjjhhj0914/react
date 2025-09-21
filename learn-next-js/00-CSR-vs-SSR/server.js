@@ -8,7 +8,7 @@ const base = process.env.BASE || '/' // 기본 경로
 
 // 프로덕션 환경에서 HTML 템플릿 캐싱
 const templateHtml = isProduction
-  ? await fs.readFile('./dist/client/index.html', 'utf-8')
+  ? await fs.readFile('./distribute/client/index.html', 'utf-8')
   : ''
 
 // HTTP 서버 생성
@@ -31,7 +31,7 @@ if (!isProduction) {
   const compression = (await import('compression')).default
   const sirv = (await import('sirv')).default
   app.use(compression()) // gzip 압축
-  app.use(base, sirv('./dist/client', { extensions: [] })) // 정적 파일 서비스
+  app.use(base, sirv('./distribute/client', { extensions: [] })) // 정적 파일 서비스
 }
 
 // HTML 응답 처리
@@ -41,7 +41,7 @@ app.use('*all', async (req, res) => {
 
     /** @type {string} */
     let template
-    /** @type {import('./src/entry-server.ts').render} */
+    /** @type {import('./src/entry-server.tsx').render} */
     let render
     if (!isProduction) {
       // 개발 환경: 항상 최신 템플릿을 읽고, Vite의 HTML 변환 적용
@@ -51,7 +51,7 @@ app.use('*all', async (req, res) => {
     } else {
       // 프로덕션 환경: 캐싱된 템플릿과 서버 번들 사용
       template = templateHtml
-      render = (await import('./dist/server/entry-server.js')).render
+      render = (await import('./distribute/server/entry-server.js')).render
     }
 
     // SSR 렌더 함수 실행 (head, html 반환)

@@ -2,8 +2,7 @@
   // --------------------------------------------------------------------------
   // 저장 시 자동 포맷 및 ESLint/Prettier 적용
   // --------------------------------------------------------------------------
-
-  "editor.formatOnSave": true, // 저장할 때 자동 포맷
+  
   "editor.defaultFormatter": "esbenp.prettier-vscode", // 기본 포맷터 설정
 
   "editor.codeActionsOnSave": {

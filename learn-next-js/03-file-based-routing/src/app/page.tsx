@@ -1,10 +1,9 @@
-import { Button } from '@/components'
+import { Section } from '@/components'
 
 export default function HomePage() {
   return (
-    <section>
-      <h1>홈 페이지</h1>
-      <Button>로그인</Button>
-    </section>
+    <Section title="홈 페이지">
+      <p>홈 페이지 방문</p>
+    </Section>
   )
 }
