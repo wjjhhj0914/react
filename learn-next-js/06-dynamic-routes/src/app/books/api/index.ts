@@ -28,8 +28,6 @@ const fetchBooks = async ({
 
   const responseData = await response.json()
 
-  console.log(response)
-
   if (!response.ok) {
     throw new Error(responseData)
   }

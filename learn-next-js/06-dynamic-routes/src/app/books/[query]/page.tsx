@@ -8,8 +8,14 @@ export const metadata: Metadata = {
   description: '런메이트(LearnMate)가 추천하는 도서 목록을 확인하세요.',
 }
 
-export default async function BooksPage() {
-  const booksData = await fetchBooks({ query: 'react' })
+interface Props {
+  params: Promise<{ query: string }>
+}
+
+export default async function BooksPage({ params }: Props) {
+  const { query } = await params
+
+  const booksData = await fetchBooks({ query: decodeURIComponent(query) })
 
   return (
     <Section title="도서 목록 페이지">
