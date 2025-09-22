@@ -6,15 +6,21 @@ import '@/styles/main.css'
 // --------------------------------------------------------------------------
 // 정적 메타데이터 내보내기
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://learnmate.com'
+
 export const metadata: Metadata = {
-  title: 'LearnMate - 1:1 퍼스널 맨투맨 학습 서비스',
+  metadataBase: new URL(siteUrl),
+  title: {
+    template: '%s | 런메이트(LearnMate)',
+    default: '런메이트(LearnMate) - 1:1 퍼스널 맨투맨 학습 서비스',
+  },
   description:
     '전문 강사진과 함께하는 개인 맞춤형 학습 솔루션. 학습 목표와 수준에 맞춘 1:1 개인 교육으로 효과적인 성장을 경험하세요.',
   openGraph: {
     siteName: 'LearnMate',
     type: 'website',
     locale: 'ko_KR',
-    url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://learnmate.com',
+    url: siteUrl,
     images: [
       {
         url: '/og_image.png',
