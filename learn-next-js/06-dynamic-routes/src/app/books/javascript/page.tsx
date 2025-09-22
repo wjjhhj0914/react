@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import fetchBooks from '@/app/books/api'
 import { Section } from '@/components'
-import Books from './components/books'
+import Books from '../components/books'
 
 export const metadata: Metadata = {
   title: '도서 목록',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 }
 
 export default async function BooksPage() {
-  const booksData = await fetchBooks({ query: 'HTML' })
+  const booksData = await fetchBooks({ query: 'javascript' })
 
   return (
     <Section title="도서 목록 페이지">
