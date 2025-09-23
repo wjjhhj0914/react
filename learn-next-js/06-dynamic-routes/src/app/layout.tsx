@@ -62,6 +62,9 @@ function Navigation() {
           <NavLink href="/">홈</NavLink>
         </li>
         <li>
+          <NavLink href="/posts">포스트 리스트</NavLink>
+        </li>
+        {/* <li>
           <NavLink href="/catch-all/next/react/tailwindcss/supabase">
             catch-all 세그먼트
           </NavLink>
@@ -79,7 +82,7 @@ function Navigation() {
         </li>
         <li>
           <NavLink href="/auth/sign-in">로그인</NavLink>
-        </li>
+        </li> */}
         <li>
           <NavLink href="/books">도서 목록</NavLink>
         </li>
@@ -89,9 +92,9 @@ function Navigation() {
           </NavLink>
           <ul
             className={`
-              hidden 
-              absolute left-0 w-[8ch] 
-              p-3 pt-2 rounded-md shadow-lg 
+              hidden
+              absolute left-0 w-[8ch]
+              p-3 pt-2 rounded-md shadow-lg
               space-y-1
               bg-slate-900
               group-hover:block
