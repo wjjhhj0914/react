@@ -23,18 +23,19 @@ export default function QuoteSinglePage() {
 
   if ('message ' in quoteResponse) {
     return notFound()
-  }
-  return (
-    <Section title="인용 구절">
-      <blockquote
-        className={tw`
+  } else {
+    return (
+      <Section title="인용 구절">
+        <blockquote
+          className={tw`
           flex flex-col gap-y-4
           p-5 border-5 border-slate-200 text-slate-700
         `}
-      >
-        <p>{quoteResponse.quote}</p>
-        <cite>{quoteResponse.author}</cite>
-      </blockquote>
-    </Section>
-  )
+        >
+          <p>{quoteResponse.quote}</p>
+          <cite>{quoteResponse.author}</cite>
+        </blockquote>
+      </Section>
+    )
+  }
 }

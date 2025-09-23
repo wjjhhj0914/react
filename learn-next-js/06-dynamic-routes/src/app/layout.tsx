@@ -62,6 +62,16 @@ function Navigation() {
           <NavLink href="/">홈</NavLink>
         </li>
         <li>
+          <NavLink href="/catch-all/next/react/tailwindcss/supabase">
+            catch-all 세그먼트
+          </NavLink>
+        </li>
+        <li>
+          <NavLink href="/optional-catch-all">
+            옵셔널 catch-all 세그먼트
+          </NavLink>
+        </li>
+        <li>
           <NavLink href="/quotes">인용 목록</NavLink>
         </li>
         <li>
