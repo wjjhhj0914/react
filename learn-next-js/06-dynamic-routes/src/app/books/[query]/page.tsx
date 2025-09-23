@@ -15,7 +15,11 @@ interface Props {
 export default async function BooksPage({ params }: Props) {
   const { query } = await params
 
-  const booksData = await fetchBooks({ query: decodeURIComponent(query) })
+  const booksData = await fetchBooks({
+    query: decodeURIComponent(query),
+    size: 15,
+    sort: 'latest',
+  })
 
   return (
     <Section title="도서 목록 페이지">

@@ -62,6 +62,9 @@ function Navigation() {
           <NavLink href="/">홈</NavLink>
         </li>
         <li>
+          <NavLink href="/quotes">인용 목록</NavLink>
+        </li>
+        <li>
           <NavLink href="/auth/sign-up">회원가입</NavLink>
         </li>
         <li>
@@ -76,9 +79,9 @@ function Navigation() {
           </NavLink>
           <ul
             className={`
-              hidden 
-              absolute left-0 w-[8ch] 
-              p-3 pt-2 rounded-md shadow-lg 
+              hidden
+              absolute left-0 w-[8ch]
+              p-3 pt-2 rounded-md shadow-lg
               space-y-1
               bg-slate-900
               group-hover:block
