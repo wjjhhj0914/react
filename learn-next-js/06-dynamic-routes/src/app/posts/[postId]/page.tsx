@@ -1,11 +1,17 @@
+import { LucideHeart } from 'lucide-react'
 import { Link, Section } from '@/components'
 import { tw } from '@/utils'
-import { fetchSinglePostById, fetchUserById } from '../api'
+import {
+  fetchCommentsByPostId,
+  fetchSinglePostById,
+  fetchUserById,
+} from '../api'
 
 export default async function PostDetailPage({ params }: Props) {
   const { postId } = await params
   const post = await fetchSinglePostById(postId)
   const { username, email } = await fetchUserById(post.userId)
+  const { comments } = await fetchCommentsByPostId(postId)
 
   return (
     <Section title="포스트 아이템">
@@ -56,6 +62,61 @@ export default async function PostDetailPage({ params }: Props) {
             </li>
           ))}
         </ul>
+      </article>
+      <article
+        data-comments
+        className={tw`
+          flex flex-col gap-3
+          my-1 rounded-lg
+          border-4 border-slate-300/80 w-full p-4 text-slate-800
+        `}
+      >
+        <h3 className="text-xl font-medium text-slate-800">댓글 목록</h3>
+        {comments.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {comments.map((comment) => (
+              <li
+                key={comment.id}
+                className={tw`
+                relative
+                rounded-lg
+                bg-slate-200/50 w-full py-3 px-4 text-slate-800
+              `}
+              >
+                <Link
+                  href={`/posts/user/${comment.user.id}`}
+                  className="text-md font-medium text-blue-700/70 hover:text-blue-900"
+                >
+                  {comment.user.username}
+                </Link>
+                <p className="text-sm">{comment.body}</p>
+                <button
+                  type="button"
+                  aria-label={`좋아요 (현재 좋아요 갯수: ${comment.likes}개)`}
+                  className={tw`
+                  cursor-pointer
+                  absolute top-1/2 -translate-y-1/2 right-4
+                  text-rose-600 hover:text-rose-800
+                `}
+                >
+                  <span
+                    className={tw`
+                    absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                    font-black
+                    text-xs
+                    text-white
+                  `}
+                  >
+                    {comment.likes}
+                  </span>
+                  <LucideHeart strokeWidth={0} size={36} fill="currentColor" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-slate-700">댓글이 없어요! 🥲</div>
+        )}
       </article>
     </Section>
   )
