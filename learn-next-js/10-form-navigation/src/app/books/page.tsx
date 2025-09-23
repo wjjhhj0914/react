@@ -1,0 +1,53 @@
+import type { Metadata } from 'next'
+import { Link, Section } from '@/components'
+import { tw } from '@/utils'
+import SearchForm from './components/search-form'
+
+export const metadata: Metadata = {
+  title: '도서 목록',
+  description: '런메이트(LearnMate)가 추천하는 도서 목록을 확인하세요.',
+}
+
+export default async function BooksPage() {
+  const bookList = [
+    { title: 'Next.js', href: '/books/next.js' },
+    { title: 'React', href: '/books/리액트' },
+    { title: 'Tailwind CSS', href: '/books/테일윈드' },
+    { title: 'Shandcn/ui', href: '/books/shadcn' },
+    { title: 'JavaScript', href: '/books/javascript' },
+    { title: 'HTML', href: '/books/html' },
+    { title: 'CSS', href: '/books/css' },
+  ]
+
+  return (
+    <Section title="도서 목록 페이지">
+      <p>도서 목록 페이지 방문</p>
+
+      <SearchForm />
+
+      <nav className="w-full  max-w-xl mt-6">
+        <ul className="grid grid-cols-1 gap-4">
+          {bookList.map((book, index) => (
+            <li
+              key={index}
+              className="transform transition-all duration-300 hover:scale-102"
+            >
+              <Link
+                href={book.href}
+                className={tw`
+                  block p-4 
+                  rounded shadow-sm 
+                  hover:shadow-md border border-gray-100
+                  text-center text-lg text-slate-700
+                  font-medium 
+                `}
+              >
+                {book.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </Section>
+  )
+}
