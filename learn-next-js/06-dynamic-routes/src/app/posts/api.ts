@@ -1,7 +1,14 @@
-import type { PostListResponse, User } from './types'
+import type { Post, PostListResponse, User } from './types'
 
 export const fetchAllPosts = async (): Promise<PostListResponse> => {
   const response = await fetch('https://dummyjson.com/posts')
+  return response.json()
+}
+
+export const fetchSinglePostById = async (
+  postId: number | string
+): Promise<Post> => {
+  const response = await fetch(`https://dummyjson.com/posts/${postId}`)
   return response.json()
 }
 
