@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Link, Section } from '@/components'
+import { gothicA1 } from '@/fonts'
 import { tw } from '@/utils'
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default async function BooksPage() {
   ]
 
   return (
-    <Section title="도서 목록 페이지">
+    <Section title="도서 목록 페이지" className={tw(gothicA1.className)}>
       <p>도서 목록 페이지 방문</p>
       <nav className="w-full mt-6">
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -31,11 +32,11 @@ export default async function BooksPage() {
               <Link
                 href={book.href}
                 className={tw`
-                  block p-4 
-                  rounded shadow-sm 
+                  block p-4
+                  rounded shadow-sm
                   hover:shadow-md border border-gray-100
                   text-center text-lg text-slate-700
-                  font-medium 
+                  font-black
                 `}
               >
                 {book.title}
