@@ -108,11 +108,25 @@ export interface Comment {
   body: string
   postId: number
   likes: number
-  user: User
+  user: CommentUser
 }
 
-export interface User {
+export interface CommentUser {
   id: number
   username: string
   fullName: string
+}
+
+export interface UsersPostsResponse {
+  posts: Post[]
+  total: number
+  skip: number
+  limit: number
+}
+
+export interface TagPostsResponse {
+  posts: Post[]
+  total: number
+  skip: number
+  limit: number
 }
