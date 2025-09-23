@@ -18,8 +18,6 @@ const fetchBooks = async ({
 
   const booksEndpoint = `${KAKAO_BOOKS_API}${searchParams.toString()}`
 
-  console.log(booksEndpoint)
-
   const response = await fetch(booksEndpoint, {
     method: 'GET',
     headers: {
