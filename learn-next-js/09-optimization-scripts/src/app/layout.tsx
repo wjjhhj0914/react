@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import type { Metadata } from 'next'
 import { NavLink } from '@/components'
-// import { spoqaHandSansNeo } from '@/fonts'
+import { spoqaHandSansNeo } from '@/fonts'
 import '@/styles/main.css'
 import { tw } from '@/utils'
 
@@ -33,15 +33,16 @@ export const metadata: Metadata = {
 // --------------------------------------------------------------------------
 // 폰트
 
-const classes = tw()
-// 사용할 폰트의 variable 등록
-// spoqaHandSansNeo.variable,
-// fonts.pretendard.variable,
-// fonts.notoSansKR.variable,
-// fonts.gothicA1.variable,
-// 'antialiased',
-// 등록한 폰트 유틸리티 클래스 설정
-// 'font-spoqa'
+const classes = tw(
+  // 사용할 폰트의 variable 등록
+  spoqaHandSansNeo.variable,
+  // fonts.pretendard.variable,
+  // fonts.notoSansKR.variable,
+  // fonts.gothicA1.variable,
+  // 'antialiased',
+  // 등록한 폰트 유틸리티 클래스 설정
+  'font-spoqa'
+)
 
 // --------------------------------------------------------------------------
 // 루트 레이아웃 컴포넌트
@@ -52,8 +53,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <body className={tw('overflow-y-scroll', classes)}>
         <header
           className={tw`
-            fixed z-10000 top-0 left-0 right-0 
-            bg-slate-950/80 text-white backdrop-blur-xs  
+            fixed z-10000 top-0 left-0 right-0
+            bg-slate-950/80 text-white backdrop-blur-xs
           `}
         >
           <Navigation />
@@ -76,6 +77,9 @@ function Navigation() {
           <NavLink href="/">홈</NavLink>
         </li>
         <li>
+          <NavLink href="/jquery">Script 컴포넌트</NavLink>
+        </li>
+        <li>
           <NavLink href="/auth/sign-up">회원가입</NavLink>
         </li>
         <li>
@@ -90,9 +94,9 @@ function Navigation() {
           </NavLink>
           <ul
             className={`
-              hidden 
-              absolute left-0 w-[8ch] 
-              p-3 pt-2 rounded-md shadow-lg 
+              hidden
+              absolute left-0 w-[8ch]
+              p-3 pt-2 rounded-md shadow-lg
               space-y-1
               bg-slate-900
               group-hover:block
