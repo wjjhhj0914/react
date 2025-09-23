@@ -92,9 +92,9 @@ function Navigation() {
           </NavLink>
           <ul
             className={`
-              hidden
-              absolute left-0 w-[8ch]
-              p-3 pt-2 rounded-md shadow-lg
+              hidden 
+              absolute left-0 w-[8ch] 
+              p-3 pt-2 rounded-md shadow-lg 
               space-y-1
               bg-slate-900
               group-hover:block

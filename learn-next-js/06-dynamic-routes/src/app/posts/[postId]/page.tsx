@@ -21,7 +21,7 @@ export default async function PostDetailPage({ params }: Props) {
         className={tw`
           flex flex-col gap-3
           my-3 rounded-lg
-          border-4 border-slate-300/80 w-full p-4 text-slate-800
+          border-4 border-slate-300/80 w-full p-4 text-slate-800  
         `}
       >
         <h3 className="-order-1 text-2xl font-medium uppercase text-slate-800/80">
@@ -68,7 +68,7 @@ export default async function PostDetailPage({ params }: Props) {
         className={tw`
           flex flex-col gap-3
           my-1 rounded-lg
-          border-4 border-slate-300/80 w-full p-4 text-slate-800
+          border-4 border-slate-300/80 w-full p-4 text-slate-800  
         `}
       >
         <h3 className="text-xl font-medium text-slate-800">댓글 목록</h3>
@@ -80,7 +80,7 @@ export default async function PostDetailPage({ params }: Props) {
                 className={tw`
                 relative
                 rounded-lg
-                bg-slate-200/50 w-full py-3 px-4 text-slate-800
+                bg-slate-200/50 w-full py-3 px-4 text-slate-800  
               `}
               >
                 <Link
@@ -94,7 +94,7 @@ export default async function PostDetailPage({ params }: Props) {
                   type="button"
                   aria-label={`좋아요 (현재 좋아요 갯수: ${comment.likes}개)`}
                   className={tw`
-                  cursor-pointer
+                  cursor-pointer 
                   absolute top-1/2 -translate-y-1/2 right-4
                   text-rose-600 hover:text-rose-800
                 `}

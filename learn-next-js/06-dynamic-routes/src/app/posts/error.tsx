@@ -12,22 +12,22 @@ export default function Error({ error, reset }: Props) {
     <div
       role="alert"
       className={tw`
-        min-h-screen flex items-center justify-center
+        min-h-screen flex items-center justify-center 
         bg-gradient-to-br from-orange-900 to-gray-900 p-4
       `}
     >
       <div
         className={tw`
-          overflow-hidden w-full max-w-md
-          bg-white/10 backdrop-blur-md rounded-xl shadow-2xl
+          overflow-hidden w-full max-w-md 
+          bg-white/10 backdrop-blur-md rounded-xl shadow-2xl 
           border border-orange-500/20
         `}
       >
         <div className="p-6">
           <div
             className={tw`
-              flex items-center justify-center w-16 h-16
-              mx-auto mb-4 rounded-full bg-orange-600/20
+              flex items-center justify-center w-16 h-16 
+              mx-auto mb-4 rounded-full bg-orange-600/20  
             `}
           >
             <svg
@@ -49,7 +49,7 @@ export default function Error({ error, reset }: Props) {
           <h1
             className={tw`
               mb-2
-              text-2xl text-center text-white
+              text-2xl text-center text-white 
               font-light tracking-wide
             `}
           >
@@ -77,11 +77,11 @@ export default function Error({ error, reset }: Props) {
               aria-label="페이지 복구 시도하기"
               className={tw`
                 cursor-pointer
-                px-6 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700
-                text-white font-medium rounded-lg shadow-lg
-                transition-all duration-200 transform
+                px-6 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 
+                text-white font-medium rounded-lg shadow-lg 
+                transition-all duration-200 transform 
                 hover:from-orange-700 hover:to-orange-800 hover:-translate-y-0.5
-                active:translate-y-0
+                active:translate-y-0 
                 focus:ring-2 focus:ring-orange-500 focus:ring-opacity-20 focus:outline-none
               `}
             >
